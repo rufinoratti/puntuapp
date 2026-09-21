@@ -17,7 +17,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
-import { Skiper39 } from "@/components/ui/skiper-ui/skiper39";
+import { CrowdCanvas } from "@/components/ui/skiper-ui/skiper39";
 import { Skiper52, type Skiper52Item } from "@/components/ui/skiper-ui/skiper52";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -412,10 +412,12 @@ export function PuntuappHome() {
       </section>
 
       <footer className="relative isolate overflow-hidden border-t border-canvas-line px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <Skiper39
+        <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[220px] opacity-35"
-        />
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[220px] overflow-hidden opacity-35"
+        >
+          <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
+        </div>
         <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
           <div>
             <Link href="/" className="text-5xl font-black leading-none tracking-[-0.1em] text-brand sm:text-7xl">

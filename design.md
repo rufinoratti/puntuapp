@@ -61,7 +61,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 ## Componentes de referencia
 
 - `src/components/ui/skiper-ui/skiper52.tsx`: galería expandible adaptada para títulos en tendencia.
-- `src/components/ui/skiper-ui/skiper39.tsx`: Canvas Crowd de Skiper39 adaptado con sus personajes ilustrados y spritesheet local para el footer.
+- `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local.
 - `src/components/ui/skiper-ui/puntuapp-preloader.tsx`: preload propio inspirado en el concepto Double Stairs.
 - `src/components/home/puntuapp-home.tsx`: composición de la landing y catálogo.
 
