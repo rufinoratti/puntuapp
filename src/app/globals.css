@@ -163,6 +163,10 @@
   width: 220px;
 }
 
+.hero-carousel-frame > div {
+  background-color: var(--canvas);
+}
+
 @media (max-width: 39.999rem) {
   .hero-carousel-frame .Carousal_003 {
     position: relative;
