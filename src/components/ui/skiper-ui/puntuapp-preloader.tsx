@@ -60,10 +60,10 @@ export function PuntuappPreloader() {
             transition={{ duration: 0.2, delay: reducedMotion ? 0 : 0.15, ease: motionEase }}
             className="relative z-10 text-center"
           >
-            <p className="text-4xl font-black leading-none tracking-[-0.1em] text-white sm:text-6xl">
+            <p className="text-4xl font-black leading-none tracking-[-0.1em] text-brand sm:text-6xl">
               PUNTU<span className="text-coral">APP</span>
             </p>
-            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/65">Lo que te mueve</p>
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand/75">Lo que te mueve</p>
           </motion.div>
         </motion.div>
       ) : null}

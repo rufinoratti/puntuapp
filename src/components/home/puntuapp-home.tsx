@@ -17,6 +17,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
+import { Skiper39 } from "@/components/ui/skiper-ui/skiper39";
 import { Skiper52, type Skiper52Item } from "@/components/ui/skiper-ui/skiper52";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,7 @@ const journalNotes = [
   },
 ];
 
-const trendingItems: Skiper52Item[] = mediaItems.slice(0, 6).map((item, index) => ({
+const trendingItems: Skiper52Item[] = mediaItems.slice(0, 5).map((item, index) => ({
   src: item.image,
   alt: item.imageAlt,
   code: `0${index + 1}`,
@@ -179,16 +180,6 @@ export function PuntuappHome() {
         Saltar al catálogo
       </a>
 
-      <div className="bg-sky px-4 py-2.5 text-center text-xs font-medium text-sky-foreground">
-        <span>Tu próxima obsesión puede estar a una reseña de distancia.</span>
-        <Link
-          href="#catalogo"
-          className="ml-2 inline-flex items-center gap-1 rounded-full bg-coral px-3 py-1 font-semibold text-coral-foreground transition hover:bg-coral/80"
-        >
-          Explorar ahora <ArrowUpRight aria-hidden="true" className="size-3" />
-        </Link>
-      </div>
-
       <header className="relative z-20">
         <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-4 py-5 sm:px-6 lg:px-8">
           <Link
@@ -225,14 +216,14 @@ export function PuntuappHome() {
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-[1440px] px-4 pb-12 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pt-8">
-        <div className="grid items-center gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-14">
-          <div className="relative z-10 max-w-xl lg:pb-8">
+      <section className="mx-auto w-full max-w-[1440px] px-4 pb-14 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-8">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:gap-10 xl:gap-16">
+          <div className="relative z-10 w-full max-w-[680px] lg:pb-8">
             <p className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand">
               <span className="inline-block size-2 rounded-full bg-coral" />
               Películas + videojuegos
             </p>
-            <h1 className="max-w-[10ch] font-display text-6xl leading-[0.86] tracking-[-0.07em] text-brand sm:text-7xl lg:text-[7.2rem]">
+            <h1 className="max-w-[12ch] font-display text-6xl leading-[0.86] tracking-[-0.07em] text-brand sm:text-7xl lg:text-[6.7rem] xl:text-[7.2rem]">
               Guardá lo que <span className="text-coral">te mueve.</span>
             </h1>
             <p className="mt-7 max-w-md text-base leading-7 text-canvas-muted sm:text-lg">
@@ -264,7 +255,7 @@ export function PuntuappHome() {
             </div>
           </div>
 
-          <div className="relative min-h-[380px] lg:min-h-[520px]" aria-label="Películas y videojuegos en tendencia">
+          <div className="relative min-h-[380px] lg:min-h-[500px]" aria-label="Películas y videojuegos en tendencia">
             <div className="mb-3 flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
               <span>Ahora en PuntuApp</span>
               <span className="text-canvas-muted">Pasá por las portadas</span>
@@ -420,8 +411,12 @@ export function PuntuappHome() {
         </div>
       </section>
 
-      <footer className="border-t border-canvas-line px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <div className="mx-auto grid w-full max-w-[1440px] gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
+      <footer className="relative isolate overflow-hidden border-t border-canvas-line px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <Skiper39
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[260px] opacity-55"
+        />
+        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
           <div>
             <Link href="/" className="text-5xl font-black leading-none tracking-[-0.1em] text-brand sm:text-7xl">
               PUNTU<span className="text-coral">APP</span>

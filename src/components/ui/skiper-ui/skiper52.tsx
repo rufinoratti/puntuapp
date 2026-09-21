@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import type { CSSProperties } from "react";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -25,78 +24,64 @@ const motionEase = [0.23, 1, 0.32, 1] as const;
 
 export function Skiper52({ items, className }: Skiper52Props) {
   const [activeImage, setActiveImage] = useState(0);
+  const activeItem = items[activeImage] ?? items[0];
+
+  if (!activeItem) return null;
 
   return (
-    <div
-      className={cn("flex h-full min-h-[330px] w-full items-center justify-center overflow-hidden rounded-[2rem] bg-sky p-4 sm:min-h-[430px] sm:p-6", className)}
-      style={
-        {
-          "--skiper-active-width": "clamp(11rem, 34vw, 24rem)",
-          "--skiper-collapsed-width": "clamp(2rem, 6vw, 5rem)",
-        } as CSSProperties
-      }
-    >
-      <motion.div
-        initial={{ opacity: 0, transform: "translateY(20px)" }}
-        animate={{ opacity: 1, transform: "translateY(0)" }}
-        transition={{ duration: 0.3, delay: 0.15, ease: motionEase }}
-        className="w-full"
-      >
-        <div className="flex w-full items-center justify-center gap-1 sm:gap-1.5">
+    <div className={cn("h-full min-h-[330px] w-full overflow-hidden rounded-[2rem] border border-brand/10 bg-sky p-3 shadow-[0_18px_50px_oklch(0.25_0.04_155_/_0.08)] sm:min-h-[430px] sm:p-5", className)}>
+      <div className="grid h-full min-h-[300px] gap-2.5 sm:min-h-[390px] md:grid-cols-[minmax(0,1.35fr)_minmax(9rem,0.65fr)]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeItem.code}
+            initial={{ opacity: 0, transform: "scale(0.98)" }}
+            animate={{ opacity: 1, transform: "scale(1)" }}
+            exit={{ opacity: 0, transform: "scale(0.98)" }}
+            transition={{ duration: 0.3, ease: motionEase }}
+            className="group relative min-h-[20rem] overflow-hidden rounded-[1.45rem] border-0 bg-canvas sm:min-h-[24rem] sm:rounded-[1.75rem] md:min-h-0"
+          >
+            <Image src={activeItem.src} alt={activeItem.alt} fill sizes="(min-width: 768px) 42vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-canvas-foreground/90 via-canvas-foreground/15 to-transparent" />
+            <div className="absolute inset-x-4 bottom-4 text-canvas-subtle sm:inset-x-6 sm:bottom-6">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">{activeItem.code} · Ahora en PuntuApp</p>
+                  <p className="mt-1 font-display text-3xl leading-none tracking-[-0.045em] text-white sm:text-4xl">{activeItem.title}</p>
+                  <p className="mt-2 text-xs text-white/75">{activeItem.meta}</p>
+                </div>
+                <span className="rounded-full bg-coral px-2.5 py-1 text-xs font-bold text-coral-foreground">{activeItem.rating.toFixed(1)}</span>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-1 md:grid-rows-4">
           {items.map((item, index) => {
-            const isActive = activeImage === index;
+            if (activeImage === index) return null;
 
             return (
               <motion.button
                 key={item.code}
                 type="button"
                 aria-label={`${item.title}, ${item.meta}`}
-                aria-pressed={isActive}
-                className="relative h-[18rem] shrink-0 cursor-pointer overflow-hidden rounded-[1.35rem] border-0 bg-transparent p-0 outline-none ring-brand transition-[box-shadow] duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sky sm:h-[25rem] sm:rounded-[1.8rem]"
-                initial={{ width: "var(--skiper-collapsed-width)" }}
-                animate={{ width: isActive ? "var(--skiper-active-width)" : "var(--skiper-collapsed-width)" }}
-                transition={{ duration: 0.3, ease: motionEase }}
+                aria-pressed="false"
+                className="group relative min-h-[7rem] cursor-pointer overflow-hidden rounded-[1.15rem] border-0 bg-canvas p-0 text-left outline-none ring-brand transition-[box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sky md:min-h-0"
                 onClick={() => setActiveImage(index)}
                 onFocus={() => setActiveImage(index)}
                 onHoverStart={() => setActiveImage(index)}
+                whileHover={{ y: -2 }}
               >
-                <Image src={item.src} alt={item.alt} fill sizes="(min-width: 640px) 34vw, 55vw" className="object-cover" />
-                <AnimatePresence>
-                  {isActive ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute inset-0 bg-gradient-to-t from-canvas-foreground/85 via-canvas-foreground/10 to-transparent"
-                    />
-                  ) : null}
-                </AnimatePresence>
-                <AnimatePresence>
-                  {isActive ? (
-                    <motion.div
-                      initial={{ opacity: 0, transform: "translateY(8px)" }}
-                      animate={{ opacity: 1, transform: "translateY(0)" }}
-                      exit={{ opacity: 0, transform: "translateY(8px)" }}
-                      transition={{ duration: 0.2, ease: motionEase }}
-                      className="absolute inset-x-4 bottom-4 text-left text-canvas-subtle sm:inset-x-5 sm:bottom-5"
-                    >
-                      <div className="flex items-end justify-between gap-3">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/65">{item.code}</p>
-                          <p className="mt-1 font-display text-2xl leading-none tracking-[-0.04em] text-white sm:text-3xl">{item.title}</p>
-                          <p className="mt-2 text-xs text-white/70">{item.meta}</p>
-                        </div>
-                        <span className="rounded-full bg-coral px-2.5 py-1 text-xs font-bold text-coral-foreground">{item.rating.toFixed(1)}</span>
-                      </div>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                <Image src={item.src} alt={item.alt} fill sizes="(min-width: 768px) 15vw, 45vw" className="object-cover transition duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-canvas-foreground/80 via-transparent to-transparent" />
+                <div className="absolute inset-x-3 bottom-2.5 flex items-end justify-between gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/80">{item.code}</span>
+                  <span className="rounded-full bg-canvas/95 px-2 py-1 text-[10px] font-bold text-brand">{item.rating.toFixed(1)}</span>
+                </div>
               </motion.button>
             );
           })}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

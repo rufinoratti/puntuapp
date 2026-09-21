@@ -34,14 +34,13 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 
 ## Arquitectura de la home
 
-1. **Announcement bar:** mensaje breve y CTA coral.
-2. **Header:** wordmark PUNTUAPP, navegación corta y acceso de cuenta.
-3. **Hero:** promesa de producto a la izquierda y explorador visual de tendencias a la derecha.
-4. **Callout de criterio:** explica que la biblioteca se construye con la voz del usuario.
-5. **Catálogo:** búsqueda, filtros y fichas con portada, tipo, rating, año y creador.
-6. **Comunidad:** bloque coral para presentar la futura capa social.
-7. **Journal:** selecciones y notas editoriales que conectan películas y videojuegos.
-8. **Footer:** navegación simple, identidad y próximos accesos.
+1. **Header:** wordmark PUNTUAPP, navegación corta y acceso de cuenta.
+2. **Hero:** promesa de producto a la izquierda y explorador visual de tendencias a la derecha, con una división desktop cercana al 50/50.
+3. **Callout de criterio:** explica que la biblioteca se construye con la voz del usuario.
+4. **Catálogo:** búsqueda, filtros y fichas con portada, tipo, rating, año y creador.
+5. **Comunidad:** bloque coral para presentar la futura capa social.
+6. **Journal:** selecciones y notas editoriales que conectan películas y videojuegos.
+7. **Footer:** navegación simple, identidad y una multitud animada muy sutil en segundo plano.
 
 ## Movimiento
 
@@ -62,6 +61,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 ## Componentes de referencia
 
 - `src/components/ui/skiper-ui/skiper52.tsx`: galería expandible adaptada para títulos en tendencia.
+- `src/components/ui/skiper-ui/skiper39.tsx`: Canvas Crowd adaptado a siluetas vectoriales para el footer.
 - `src/components/ui/skiper-ui/puntuapp-preloader.tsx`: preload propio inspirado en el concepto Double Stairs.
 - `src/components/home/puntuapp-home.tsx`: composición de la landing y catálogo.
 
