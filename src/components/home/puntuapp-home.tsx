@@ -416,7 +416,13 @@ export function PuntuappHome() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[500px] overflow-hidden opacity-20 sm:h-[400px] lg:h-[440px]"
         >
-          <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} color="oklch(0.4 0.13 155)" />
+          <CrowdCanvas
+            src="/images/peeps/all-peeps.png"
+            rows={15}
+            cols={7}
+            color="oklch(0.4 0.13 155)"
+            className="lg:translate-y-12"
+          />
         </div>
         <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-12 pb-[460px] sm:pb-[340px] lg:grid-cols-2 lg:gap-10 lg:pb-[360px] xl:gap-16">
           <div>

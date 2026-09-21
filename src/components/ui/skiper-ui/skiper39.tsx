@@ -11,9 +11,10 @@ interface CrowdCanvasProps {
   rows?: number;
   cols?: number;
   color?: string;
+  className?: string;
 }
 
-const CrowdCanvas = ({ src, rows = 15, cols = 7, color }: CrowdCanvasProps) => {
+const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -323,7 +324,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color }: CrowdCanvasProps) => {
     };
   }, [color, cols, rows, src]);
   return (
-    <canvas ref={canvasRef} className="absolute bottom-0 h-[90vh] w-full" />
+    <canvas ref={canvasRef} className={`absolute bottom-0 h-[90vh] w-full ${className ?? ""}`} />
   );
 };
 
