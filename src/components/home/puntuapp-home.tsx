@@ -312,7 +312,7 @@ export function PuntuappHome() {
               <span>Ahora en PuntuApp</span>
               <span className="text-canvas-muted">Deslizá por las portadas</span>
             </div>
-            <div className="hero-carousel-frame mt-2 flex min-h-[420px] items-center justify-center overflow-visible sm:min-h-[480px] lg:min-h-[550px]">
+            <div className="hero-carousel-frame -mx-4 mt-2 flex min-h-[420px] w-[calc(100%+2rem)] items-center justify-center overflow-visible sm:mx-0 sm:min-h-[480px] sm:w-auto lg:min-h-[550px]">
               <Skiper49 />
             </div>
           </div>
