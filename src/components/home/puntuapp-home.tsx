@@ -19,7 +19,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
 import { CrowdCanvas } from "@/components/ui/skiper-ui/skiper39";
-import { Skiper52, type Skiper52Item } from "@/components/ui/skiper-ui/skiper52";
+import { Skiper49, type Skiper49Image } from "@/components/ui/skiper-ui/skiper49";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -50,13 +50,9 @@ const journalNotes = [
   },
 ];
 
-const trendingItems: Skiper52Item[] = mediaItems.slice(0, 5).map((item, index) => ({
+const trendingImages: Skiper49Image[] = mediaItems.slice(0, 6).map((item) => ({
   src: item.image,
   alt: item.imageAlt,
-  code: `0${index + 1}`,
-  title: item.title,
-  meta: `${item.type === "movie" ? "Película" : "Videojuego"} · ${item.genre}`,
-  rating: item.rating,
 }));
 
 function TypeIcon({ type }: { type: MediaType }) {
@@ -319,9 +315,9 @@ export function PuntuappHome() {
           <div className="relative min-h-[380px] lg:min-h-[500px]" aria-label="Películas y videojuegos en tendencia">
             <div className="mb-3 flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
               <span>Ahora en PuntuApp</span>
-              <span className="text-canvas-muted">Pasá por las portadas</span>
+              <span className="text-canvas-muted">Deslizá por las portadas</span>
             </div>
-            <Skiper52 items={trendingItems} />
+            <Skiper49 images={trendingImages} className="min-h-[350px] sm:min-h-[430px] lg:min-h-[500px]" />
           </div>
         </div>
       </section>
