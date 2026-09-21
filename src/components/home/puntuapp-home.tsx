@@ -411,27 +411,22 @@ export function PuntuappHome() {
         </div>
       </section>
 
-      <footer className="relative isolate min-h-[620px] overflow-hidden border-t border-canvas-line px-4 py-10 sm:px-6 sm:py-14 lg:min-h-[660px] lg:px-8 lg:py-16">
+      <footer className="relative isolate min-h-[620px] overflow-hidden border-t border-canvas-line px-4 pb-0 pt-10 sm:px-6 sm:pt-14 lg:min-h-[660px] lg:px-8 lg:pt-16">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-8 z-0 h-[360px] overflow-hidden opacity-20 sm:bottom-10 sm:h-[400px] lg:bottom-12 lg:h-[440px]"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[360px] overflow-hidden opacity-20 sm:h-[400px] lg:h-[440px]"
         >
           <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
         </div>
-        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-12 pb-[320px] sm:pb-[340px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-10 lg:pb-[360px] xl:gap-16">
+        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-12 pb-[320px] sm:pb-[340px] lg:grid-cols-2 lg:gap-10 lg:pb-[360px] xl:gap-16">
           <div>
             <Link href="/" className="text-6xl font-black leading-none tracking-[-0.1em] text-brand sm:text-8xl">
               PUNTU<span className="text-coral">APP</span>
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-6 text-canvas-muted">Un lugar para recordar lo que te dejó algo.</p>
           </div>
-          <div className="hidden flex-col items-center pt-2 text-center text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-canvas-muted lg:flex">
-            <span className="max-w-[8ch]">Crowd canvas</span>
-            <span aria-hidden="true" className="mt-3 h-16 w-px bg-canvas-line" />
-          </div>
           <div>
-            <h2 className="font-display text-6xl leading-none tracking-[-0.07em] text-brand sm:text-8xl">Enlaces</h2>
-            <div className="mt-8 grid grid-cols-2 gap-8 text-sm sm:gap-12">
+            <div className="grid grid-cols-2 gap-8 text-sm sm:gap-12">
               <div>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Explorar</p>
                 <div className="flex flex-col gap-2 text-canvas-muted">

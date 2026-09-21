@@ -40,7 +40,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 4. **Catálogo:** búsqueda, filtros y fichas con portada, tipo, rating, año y creador.
 5. **Comunidad:** bloque coral para presentar la futura capa social.
 6. **Journal:** selecciones y notas editoriales que conectan películas y videojuegos.
-7. **Footer:** marca grande a la izquierda, indicador de Crowd Canvas al centro, bloque de enlaces a la derecha y la multitud animada en segundo plano.
+7. **Footer:** marca grande a la izquierda, navegación alineada a la derecha y la multitud animada ocupando la franja inferior sin competir con los enlaces.
 
 ## Movimiento
 
@@ -61,7 +61,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 ## Componentes de referencia
 
 - `src/components/ui/skiper-ui/skiper52.tsx`: galería expandible adaptada para títulos en tendencia.
-- `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local.
+- `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local. La etiqueta técnica del demo no se muestra en la interfaz pública.
 - `src/components/ui/skiper-ui/puntuapp-preloader.tsx`: preload propio inspirado en el concepto Double Stairs.
 - `src/components/home/puntuapp-home.tsx`: composición de la landing y catálogo.
 
