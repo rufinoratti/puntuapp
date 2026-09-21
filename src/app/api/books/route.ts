@@ -7,7 +7,6 @@ const BOOK_FIELDS = [
   "author_name",
   "first_publish_year",
   "cover_i",
-  "isbn",
   "subject",
 ].join(",");
 
@@ -17,7 +16,6 @@ type OpenLibraryDocument = {
   author_name?: string[];
   first_publish_year?: number;
   cover_i?: number;
-  isbn?: string[];
   subject?: string[];
 };
 
@@ -35,10 +33,9 @@ function getCoverUrl(document: OpenLibraryDocument) {
     return `https://covers.openlibrary.org/b/id/${document.cover_i}-L.jpg?default=false`;
   }
 
-  const isbn = document.isbn?.find((value) => value.length === 13) ?? document.isbn?.[0];
-  return isbn
-    ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`
-    : "/images/book-placeholder.svg";
+  // ISBNs in Open Library can exist without a corresponding cover asset.
+  // Returning the local placeholder avoids broken Next Image requests.
+  return "/images/book-placeholder.svg";
 }
 
 export async function GET(request: NextRequest) {
