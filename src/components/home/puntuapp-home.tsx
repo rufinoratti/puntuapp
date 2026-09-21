@@ -411,14 +411,14 @@ export function PuntuappHome() {
         </div>
       </section>
 
-      <footer className="relative isolate overflow-hidden border-t border-canvas-line px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <footer className="relative isolate min-h-[620px] overflow-hidden border-t border-canvas-line px-4 py-10 sm:px-6 sm:py-14 lg:min-h-[660px] lg:px-8 lg:py-16">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[220px] overflow-hidden opacity-35"
+          className="pointer-events-none absolute inset-x-0 bottom-8 z-0 h-[360px] overflow-hidden opacity-20 sm:bottom-10 sm:h-[400px] lg:bottom-12 lg:h-[440px]"
         >
           <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
         </div>
-        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
+        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-10 pb-[320px] sm:pb-[340px] lg:pb-[360px] lg:grid-cols-[1.2fr_1fr_1fr]">
           <div>
             <Link href="/" className="text-5xl font-black leading-none tracking-[-0.1em] text-brand sm:text-7xl">
               PUNTU<span className="text-coral">APP</span>
