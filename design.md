@@ -46,7 +46,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 
 - El preload ocurre solo en la entrada de la página y comunica que PuntuApp está preparando la colección.
 - La referencia de Skiper10 se adapta como un **PuntuApp Double Stairs Preloader** con verde y coral.
-- Skiper49 se usa como coverflow invertido en el hero para recorrer las portadas de películas y videojuegos en tendencia.
+- Skiper49 se usa literalmente en el hero, con su coverflow invertido, animaciones y assets demo originales.
 - El movimiento debe ser corto, con `ease-out`, y trabajar principalmente con `transform` y `opacity`.
 - Toda interacción animada debe tener una variante respetuosa de `prefers-reduced-motion`.
 
@@ -65,7 +65,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 
 ## Componentes de referencia
 
-- `src/components/ui/skiper-ui/skiper49.tsx`: coverflow invertido de Skiper UI adaptado con las portadas mock de PuntuApp.
+- `src/components/ui/skiper-ui/skiper49.tsx`: componente original de Skiper49, sin modificaciones internas.
 - `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local. La etiqueta técnica del demo no se muestra en la interfaz pública, la multitud puede teñirse con un color de marca sin perder transparencia ni detalles claros y admite un desplazamiento responsive para controlar el recorte del encuadre.
 - `src/app/api/books/route.ts`: consulta y normaliza resultados de Open Library, con caché de una hora, límite de 12 resultados y fallback para portadas faltantes.
 - `src/components/ui/skiper-ui/puntuapp-preloader.tsx`: preload propio inspirado en el concepto Double Stairs.

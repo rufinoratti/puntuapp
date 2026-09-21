@@ -19,7 +19,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
 import { CrowdCanvas } from "@/components/ui/skiper-ui/skiper39";
-import { Skiper49, type Skiper49Image } from "@/components/ui/skiper-ui/skiper49";
+import { Skiper49 } from "@/components/ui/skiper-ui/skiper49";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -49,11 +49,6 @@ const journalNotes = [
     title: "Pequeñas historias, grandes sensaciones.",
   },
 ];
-
-const trendingImages: Skiper49Image[] = mediaItems.slice(0, 6).map((item) => ({
-  src: item.image,
-  alt: item.imageAlt,
-}));
 
 function TypeIcon({ type }: { type: MediaType }) {
   const Icon = type === "movie" ? Film : type === "game" ? Gamepad2 : BookOpen;
@@ -317,7 +312,7 @@ export function PuntuappHome() {
               <span>Ahora en PuntuApp</span>
               <span className="text-canvas-muted">Deslizá por las portadas</span>
             </div>
-            <Skiper49 images={trendingImages} className="min-h-[350px] sm:min-h-[430px] lg:min-h-[500px]" />
+            <Skiper49 />
           </div>
         </div>
       </section>

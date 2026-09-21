@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import React from "react";
 import {
   Autoplay,
   EffectCoverflow,
@@ -18,44 +18,64 @@ import "swiper/css/effect-cards";
 
 import { cn } from "@/lib/utils";
 
-export type Skiper49Image = {
-  src: string;
-  alt: string;
-};
-
-type Skiper49Props = {
-  images: Skiper49Image[];
-  className?: string;
-  showPagination?: boolean;
-  showNavigation?: boolean;
-  loop?: boolean;
-  autoplay?: boolean;
-};
-
-export function Skiper49({
-  images,
-  className,
-  showPagination = true,
-  showNavigation = false,
-  loop = true,
-  autoplay = false,
-}: Skiper49Props) {
-  if (images.length === 0) return null;
+const Skiper49 = () => {
+  const images = [
+    {
+      src: "/images/x.com/13.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/32.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/20.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/21.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/19.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/1.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/2.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/3.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/4.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/5.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+    {
+      src: "/images/x.com/6.jpeg",
+      alt: "Illustrations by my fav AarzooAly",
+    },
+  ];
 
   return (
-    <div className={cn("flex h-full w-full items-center justify-center overflow-visible rounded-[2rem] bg-transparent", className)}>
-      <Carousel_003
-        images={images}
-        showPagination={showPagination}
-        showNavigation={showNavigation}
-        loop={loop}
-        autoplay={autoplay}
-      />
+    <div className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f5f4f3]">
+      <Carousel_003 className="" images={images} showPagination loop />
     </div>
   );
-}
+};
 
-function Carousel_003({
+export { Skiper49 };
+
+const Carousel_003 = ({
   images,
   className,
   showPagination = false,
@@ -71,32 +91,22 @@ function Carousel_003({
   loop?: boolean;
   autoplay?: boolean;
   spaceBetween?: number;
-}) {
+}) => {
   const css = `
   .Carousal_003 {
     width: 100%;
-    height: clamp(340px, 35vw, 500px);
-    overflow: visible;
+    height: 350px;
     padding-bottom: 50px !important;
   }
   
   .Carousal_003 .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: clamp(170px, 20vw, 240px);
-    height: 100%;
-    overflow: hidden;
-    border-radius: 1.45rem;
+    width: 300px;
   }
 
   .swiper-pagination-bullet {
-    background-color: var(--brand) !important;
-    opacity: 0.45;
-  }
-
-  .swiper-pagination-bullet-active {
-    background-color: var(--brand) !important;
-    opacity: 1;
+    background-color: #000 !important;
   }
 
 `;
@@ -159,14 +169,11 @@ function Carousel_003({
           modules={[EffectCoverflow, Autoplay, Pagination, Navigation]}
         >
           {images.map((image, index) => (
-            <SwiperSlide key={`${image.src}-${index}`}>
-              <Image
+            <SwiperSlide key={index} className="">
+              <img
+                className="h-full w-full object-cover"
                 src={image.src}
                 alt={image.alt}
-                fill
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 35vw, 58vw"
-                className="object-cover"
-                priority={index === 0}
               />
             </SwiperSlide>
           ))}
@@ -184,7 +191,7 @@ function Carousel_003({
       </motion.div>
     </motion.div>
   );
-}
+};
 
 export { Carousel_003 };
 
