@@ -43,7 +43,7 @@ export function Skiper49({
   if (images.length === 0) return null;
 
   return (
-    <div className={cn("flex h-full w-full items-center justify-center overflow-hidden rounded-[2rem] bg-sky", className)}>
+    <div className={cn("flex h-full w-full items-center justify-center overflow-hidden rounded-[2rem] bg-transparent", className)}>
       <Carousel_003
         images={images}
         showPagination={showPagination}
