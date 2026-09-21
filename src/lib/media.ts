@@ -1,4 +1,4 @@
-export type MediaType = "movie" | "game";
+export type MediaType = "movie" | "game" | "book";
 
 export type MediaItem = {
   id: string;
@@ -14,7 +14,7 @@ export type MediaItem = {
   imageAlt: string;
 };
 
-// Datos de muestra para la primera iteración visual. Luego se reemplazan por TMDB y RAWG.
+// Datos de muestra para la primera iteración visual. Luego se reemplazan por TMDB, RAWG y Open Library.
 export const mediaItems: MediaItem[] = [
   {
     id: "dune-part-two",

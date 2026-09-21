@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="img" aria-labelledby="title description">
+  <title id="title">Portada no disponible</title>
+  <desc id="description">Una portada crema con un bloque verde y el texto PuntuApp.</desc>
+  <rect width="720" height="900" fill="#f7f3e8"/>
+  <rect x="54" y="54" width="612" height="792" rx="36" fill="#0e6a43"/>
+  <circle cx="138" cy="142" r="16" fill="#fb9568"/>
+  <text x="108" y="690" fill="#f7f3e8" font-family="Georgia, serif" font-size="62">Sin portada</text>
+  <text x="108" y="758" fill="#f7f3e8" font-family="Arial, sans-serif" font-size="22" letter-spacing="5">PUNTUAPP</text>
+</svg>

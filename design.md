@@ -67,6 +67,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 
 - `src/components/ui/skiper-ui/skiper52.tsx`: galería expandible adaptada para títulos en tendencia.
 - `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local. La etiqueta técnica del demo no se muestra en la interfaz pública, la multitud puede teñirse con un color de marca sin perder transparencia ni detalles claros y admite un desplazamiento responsive para controlar el recorte del encuadre.
+- `src/app/api/books/route.ts`: consulta y normaliza resultados de Open Library, con caché de una hora, límite de 12 resultados y fallback para portadas faltantes.
 - `src/components/ui/skiper-ui/puntuapp-preloader.tsx`: preload propio inspirado en el concepto Double Stairs.
 - `src/components/home/puntuapp-home.tsx`: composición de la landing y catálogo.
 

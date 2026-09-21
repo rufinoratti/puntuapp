@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
+  BookOpen,
   Clapperboard,
   Film,
   Gamepad2,
@@ -28,6 +29,7 @@ const filterOptions: Array<{ value: Filter; label: string }> = [
   { value: "all", label: "Todo" },
   { value: "movie", label: "Películas" },
   { value: "game", label: "Videojuegos" },
+  { value: "book", label: "Libros" },
 ];
 
 const journalNotes = [
@@ -58,12 +60,18 @@ const trendingItems: Skiper52Item[] = mediaItems.slice(0, 5).map((item, index) =
 }));
 
 function TypeIcon({ type }: { type: MediaType }) {
-  const Icon = type === "movie" ? Film : Gamepad2;
+  const Icon = type === "movie" ? Film : type === "game" ? Gamepad2 : BookOpen;
 
   return <Icon aria-hidden="true" className="size-3.5" />;
 }
 
+function mediaTypeLabel(type: MediaType) {
+  return type === "movie" ? "Película" : type === "game" ? "Videojuego" : "Libro";
+}
+
 function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boolean }) {
+  const [imageSrc, setImageSrc] = useState(item.image);
+
   return (
     <Card
       className={cn(
@@ -78,20 +86,27 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
         )}
       >
         <Image
-          src={item.image}
+          src={imageSrc}
           alt={item.imageAlt}
           fill
           sizes={featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 768px) 25vw, 100vw"}
           className="object-cover transition duration-700 group-hover:scale-105"
+          onError={item.type === "book" ? () => setImageSrc("/images/book-placeholder.svg") : undefined}
         />
         <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-canvas/95 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand shadow-sm backdrop-blur-sm">
             <TypeIcon type={item.type} />
-            {item.type === "movie" ? "Película" : "Videojuego"}
+            {mediaTypeLabel(item.type)}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-canvas/95 px-3 py-1.5 text-sm font-semibold text-canvas-foreground shadow-sm">
-            <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
-            {item.rating.toFixed(1)}
+            {item.rating > 0 ? (
+              <>
+                <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+                {item.rating.toFixed(1)}
+              </>
+            ) : (
+              "Sin puntuar"
+            )}
           </span>
         </div>
       </div>
@@ -154,11 +169,53 @@ function JournalCard({
 export function PuntuappHome() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [bookItems, setBookItems] = useState<MediaItem[]>([]);
+  const [bookSearchStatus, setBookSearchStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+    const shouldSearchBooks = normalizedQuery.length >= 3 && (filter === "all" || filter === "book");
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      if (!shouldSearchBooks) {
+        setBookItems([]);
+        setBookSearchStatus("idle");
+        return;
+      }
+
+      setBookSearchStatus("loading");
+
+      try {
+        const response = await fetch(`/api/books?query=${encodeURIComponent(normalizedQuery)}&limit=12`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Open Library request failed");
+        }
+
+        const data = (await response.json()) as { items?: MediaItem[] };
+        setBookItems(data.items ?? []);
+        setBookSearchStatus("idle");
+      } catch {
+        if (controller.signal.aborted) return;
+
+        setBookItems([]);
+        setBookSearchStatus("error");
+      }
+    }, shouldSearchBooks ? 350 : 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [filter, query]);
 
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
 
-    return mediaItems.filter((item) => {
+    const localItems = mediaItems.filter((item) => {
       const matchesType = filter === "all" || item.type === filter;
       const matchesQuery =
         normalizedQuery.length === 0 ||
@@ -168,7 +225,11 @@ export function PuntuappHome() {
 
       return matchesType && matchesQuery;
     });
-  }, [filter, query]);
+
+    if (filter === "book") return bookItems;
+    if (filter === "all") return [...localItems, ...bookItems];
+    return localItems;
+  }, [bookItems, filter, query]);
 
   return (
     <main className="min-h-[100dvh] overflow-hidden bg-canvas text-canvas-foreground selection:bg-coral selection:text-coral-foreground">
@@ -221,7 +282,7 @@ export function PuntuappHome() {
           <div className="relative z-10 w-full max-w-[680px] lg:pb-8">
             <p className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand">
               <span className="inline-block size-2 rounded-full bg-coral" />
-              Películas + videojuegos
+              Películas + videojuegos + libros
             </p>
             <h1 className="max-w-[12ch] font-display text-6xl leading-[0.86] tracking-[-0.07em] text-brand sm:text-7xl lg:text-[6.7rem] xl:text-[7.2rem]">
               Guardá lo que <span className="text-coral">te mueve.</span>
@@ -319,23 +380,44 @@ export function PuntuappHome() {
 
           <div className="relative w-full max-w-md">
             <label htmlFor="catalog-search" className="sr-only">
-              Buscar películas y videojuegos
+              Buscar películas, videojuegos y libros
             </label>
             <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-brand" />
             <Input
               id="catalog-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar título, género o creador"
+              placeholder="Buscar título, género, autor o creador"
               className="h-12 rounded-full border-canvas-line bg-canvas-subtle pl-11 text-canvas-foreground placeholder:text-canvas-muted focus-visible:border-brand focus-visible:ring-brand/20"
             />
           </div>
         </div>
 
+        {(filter === "book" || bookItems.length > 0) && (
+          <p className="mt-3 text-xs text-canvas-muted">
+            Datos bibliográficos de{" "}
+            <a
+              href="https://openlibrary.org/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand"
+            >
+              Open Library
+            </a>
+          </p>
+        )}
+
         <div className="mt-6 flex flex-wrap items-center gap-2" aria-label="Filtrar catálogo">
           {filterOptions.map((option) => {
             const isActive = filter === option.value;
-            const Icon = option.value === "movie" ? Film : option.value === "game" ? Gamepad2 : null;
+            const Icon =
+              option.value === "movie"
+                ? Film
+                : option.value === "game"
+                  ? Gamepad2
+                  : option.value === "book"
+                    ? BookOpen
+                    : null;
 
             return (
               <Button
@@ -358,7 +440,7 @@ export function PuntuappHome() {
             );
           })}
           <span className="ml-2 text-sm text-canvas-muted" aria-live="polite">
-            {filteredItems.length} resultados
+            {bookSearchStatus === "loading" ? "Buscando libros…" : `${filteredItems.length} resultados`}
           </span>
         </div>
 
@@ -370,8 +452,18 @@ export function PuntuappHome() {
           ) : (
             <div className="col-span-full flex min-h-72 flex-col items-center justify-center rounded-[2rem] border border-dashed border-canvas-line bg-canvas-subtle px-6 text-center">
               <Search aria-hidden="true" className="mb-4 size-6 text-coral" />
-              <h3 className="font-display text-3xl leading-none text-canvas-foreground">No encontramos ese título</h3>
-              <p className="mt-3 max-w-sm text-sm leading-6 text-canvas-muted">Probá con otro nombre, género o creador.</p>
+              <h3 className="font-display text-3xl leading-none text-canvas-foreground">
+                {filter === "book" && query.trim().length < 3
+                  ? "Buscá un libro para empezar"
+                  : "No encontramos ese título"}
+              </h3>
+              <p className="mt-3 max-w-sm text-sm leading-6 text-canvas-muted">
+                {bookSearchStatus === "error"
+                  ? "Open Library no respondió. Probá de nuevo en unos segundos."
+                  : filter === "book" && query.trim().length < 3
+                    ? "Escribí al menos tres letras para consultar el catálogo de libros."
+                    : "Probá con otro nombre, género, autor o creador."}
+              </p>
             </div>
           )}
         </div>
