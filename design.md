@@ -40,7 +40,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 4. **Catálogo:** búsqueda, filtros y fichas con portada, tipo, rating, año y creador.
 5. **Comunidad:** bloque coral para presentar la futura capa social.
 6. **Journal:** selecciones y notas editoriales que conectan películas y videojuegos.
-7. **Footer:** navegación simple, identidad y una multitud animada muy sutil en segundo plano.
+7. **Footer:** marca grande a la izquierda, indicador de Crowd Canvas al centro, bloque de enlaces a la derecha y la multitud animada en segundo plano.
 
 ## Movimiento
 

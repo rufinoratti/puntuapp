@@ -418,33 +418,40 @@ export function PuntuappHome() {
         >
           <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
         </div>
-        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-10 pb-[320px] sm:pb-[340px] lg:pb-[360px] lg:grid-cols-[1.2fr_1fr_1fr]">
+        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-12 pb-[320px] sm:pb-[340px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-10 lg:pb-[360px] xl:gap-16">
           <div>
-            <Link href="/" className="text-5xl font-black leading-none tracking-[-0.1em] text-brand sm:text-7xl">
+            <Link href="/" className="text-6xl font-black leading-none tracking-[-0.1em] text-brand sm:text-8xl">
               PUNTU<span className="text-coral">APP</span>
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-6 text-canvas-muted">Un lugar para recordar lo que te dejó algo.</p>
           </div>
-          <div className="grid grid-cols-2 gap-8 text-sm">
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Explorar</p>
-              <div className="flex flex-col gap-2 text-canvas-muted">
-                <Link className="transition hover:text-brand" href="#catalogo">Catálogo</Link>
-                <Link className="transition hover:text-brand" href="#comunidad">Comunidad</Link>
-                <Link className="transition hover:text-brand" href="#como-funciona">Cómo funciona</Link>
-              </div>
-            </div>
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Tu cuenta</p>
-              <div className="flex flex-col gap-2 text-canvas-muted">
-                <Link className="transition hover:text-brand" href="#catalogo">Crear perfil</Link>
-                <Link className="transition hover:text-brand" href="#catalogo">Iniciar sesión</Link>
-              </div>
-            </div>
+          <div className="hidden flex-col items-center pt-2 text-center text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-canvas-muted lg:flex">
+            <span className="max-w-[8ch]">Crowd canvas</span>
+            <span aria-hidden="true" className="mt-3 h-16 w-px bg-canvas-line" />
           </div>
-          <div className="flex flex-col justify-end lg:items-end">
-            <p className="text-sm text-canvas-muted">Hecho para quienes siempre tienen algo para recomendar.</p>
-            <p className="mt-6 text-xs font-medium uppercase tracking-[0.16em] text-brand">© PuntuApp 2026</p>
+          <div>
+            <h2 className="font-display text-6xl leading-none tracking-[-0.07em] text-brand sm:text-8xl">Enlaces</h2>
+            <div className="mt-8 grid grid-cols-2 gap-8 text-sm sm:gap-12">
+              <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Explorar</p>
+                <div className="flex flex-col gap-2 text-canvas-muted">
+                  <Link className="transition hover:text-brand" href="#catalogo">Catálogo</Link>
+                  <Link className="transition hover:text-brand" href="#comunidad">Comunidad</Link>
+                  <Link className="transition hover:text-brand" href="#como-funciona">Cómo funciona</Link>
+                </div>
+              </div>
+              <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Tu cuenta</p>
+                <div className="flex flex-col gap-2 text-canvas-muted">
+                  <Link className="transition hover:text-brand" href="#catalogo">Crear perfil</Link>
+                  <Link className="transition hover:text-brand" href="#catalogo">Iniciar sesión</Link>
+                </div>
+              </div>
+            </div>
+            <div className="mt-10 flex flex-wrap items-end justify-between gap-6">
+              <p className="max-w-sm text-sm leading-6 text-canvas-muted">Hecho para quienes siempre tienen algo para recomendar.</p>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-brand">© PuntuApp 2026</p>
+            </div>
           </div>
         </div>
       </footer>
