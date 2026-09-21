@@ -7,30 +7,58 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 interface CrowdCanvasProps {
-  /** Kept for API compatibility with the original Skiper39 component. */
-  src?: string;
+  src: string;
   rows?: number;
   cols?: number;
   className?: string;
 }
 
-type Walker = {
+type Peep = {
+  image: CanvasImageSource;
+  rect: number[];
+  sourceWidth: number;
+  sourceHeight: number;
+  width: number;
+  height: number;
   x: number;
   y: number;
+  anchorY: number;
   scale: number;
-  speed: number;
-  direction: 1 | -1;
-  phase: number;
-  opacity: number;
-  color: string;
+  scaleX: number;
+  walk: gsap.core.Timeline | null;
+  setRect: (rect: number[]) => void;
+  setScale: (scale: number) => void;
+  render: (ctx: CanvasRenderingContext2D) => void;
 };
 
-/**
- * A lightweight, asset-free adaptation of Skiper39's Canvas Crowd.
- * The footer uses vector silhouettes so the animation remains self-contained
- * and does not depend on a missing sprite sheet from the registry example.
- */
-const CrowdCanvas = ({ rows = 8, cols = 3, className }: CrowdCanvasProps) => {
+const fallbackColors = ["#0e6a43", "#fb9568", "#21362b"];
+
+const getBrandColors = () => {
+  const styles = window.getComputedStyle(document.documentElement);
+  const colors = ["--brand", "--coral", "--canvas-foreground"].map(
+    (token, index) => styles.getPropertyValue(token).trim() || fallbackColors[index],
+  );
+
+  return colors;
+};
+
+const createTintedSprite = (source: HTMLImageElement, color: string) => {
+  const sprite = document.createElement("canvas");
+  const context = sprite.getContext("2d");
+
+  if (!context) return source;
+
+  sprite.width = source.naturalWidth;
+  sprite.height = source.naturalHeight;
+  context.drawImage(source, 0, 0);
+  context.globalCompositeOperation = "source-in";
+  context.fillStyle = color;
+  context.fillRect(0, 0, sprite.width, sprite.height);
+
+  return sprite;
+};
+
+const CrowdCanvas = ({ src, rows = 15, cols = 7, className }: CrowdCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -40,107 +68,202 @@ const CrowdCanvas = ({ rows = 8, cols = 3, className }: CrowdCanvasProps) => {
     if (!canvas || !context) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const rootStyles = window.getComputedStyle(document.documentElement);
-    const colors = [
-      rootStyles.getPropertyValue("--brand").trim() || "#0e6a43",
-      rootStyles.getPropertyValue("--coral").trim() || "#fb9568",
-      rootStyles.getPropertyValue("--canvas-foreground").trim() || "#21362b",
-    ];
-    const walkerCount = Math.max(12, Math.min(rows * cols, 28));
-    const walkers: Walker[] = Array.from({ length: walkerCount }, (_, index) => ({
-      x: 0,
-      y: 0,
-      scale: 1,
-      speed: 16 + Math.random() * 22,
-      direction: index % 2 === 0 ? 1 : -1,
-      phase: Math.random() * Math.PI * 2,
-      opacity: 0.28 + Math.random() * 0.4,
-      color: colors[index % colors.length],
-    }));
+    const image = new Image();
+    const stage = { width: 0, height: 0 };
+    const allPeeps: Peep[] = [];
+    const availablePeeps: Peep[] = [];
+    const crowd: Peep[] = [];
+    const maxCrowd = 16;
+    const motionEase = gsap.parseEase("power2.in");
 
-    let width = 0;
-    let height = 0;
-    let lastTime = 0;
+    const randomRange = (min: number, max: number) => min + Math.random() * (max - min);
+    const randomIndex = (array: unknown[]) => randomRange(0, array.length) | 0;
+    const removeRandomFromArray = <T,>(array: T[]) => array.splice(randomIndex(array), 1)[0];
+
+    const resetPeep = ({ peep }: { peep: Peep }) => {
+      const direction = Math.random() > 0.5 ? 1 : -1;
+      const offsetY = 100 - 250 * motionEase(Math.random());
+      const startY = stage.height - peep.height + offsetY;
+      let endX: number;
+
+      if (direction === 1) {
+        peep.x = -peep.width;
+        endX = stage.width;
+        peep.scaleX = 1;
+      } else {
+        peep.x = stage.width + peep.width;
+        endX = 0;
+        peep.scaleX = -1;
+      }
+
+      peep.y = startY;
+      peep.anchorY = startY;
+
+      return { startY, endX };
+    };
+
+    const normalWalk = ({ peep, props }: { peep: Peep; props: ReturnType<typeof resetPeep> }) => {
+      const { startY, endX } = props;
+      const xDuration = 10;
+      const yDuration = 0.25;
+      const timeline = gsap.timeline({ paused: reducedMotion });
+
+      timeline.timeScale(randomRange(0.5, 1.5));
+      timeline.to(peep, { duration: xDuration, x: endX, ease: "none" }, 0);
+      timeline.to(
+        peep,
+        {
+          duration: yDuration,
+          repeat: xDuration / yDuration,
+          yoyo: true,
+          y: startY - 10,
+        },
+        0,
+      );
+
+      return timeline;
+    };
+
+    const createPeep = ({ image, rect }: { image: CanvasImageSource; rect: number[] }): Peep => {
+      const peep: Peep = {
+        image,
+        rect: [],
+        sourceWidth: 0,
+        sourceHeight: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        anchorY: 0,
+        scale: 1,
+        scaleX: 1,
+        walk: null,
+        setRect: (nextRect) => {
+          peep.rect = nextRect;
+          peep.sourceWidth = nextRect[2];
+          peep.sourceHeight = nextRect[3];
+          peep.width = peep.sourceWidth * peep.scale;
+          peep.height = peep.sourceHeight * peep.scale;
+        },
+        setScale: (scale) => {
+          peep.scale = scale;
+          peep.width = peep.sourceWidth * scale;
+          peep.height = peep.sourceHeight * scale;
+        },
+        render: (ctx) => {
+          ctx.save();
+          ctx.translate(peep.x, peep.y);
+          ctx.scale(peep.scaleX * peep.scale, peep.scale);
+          ctx.drawImage(
+            peep.image,
+            peep.rect[0],
+            peep.rect[1],
+            peep.sourceWidth,
+            peep.sourceHeight,
+            0,
+            0,
+            peep.sourceWidth,
+            peep.sourceHeight,
+          );
+          ctx.restore();
+        },
+      };
+
+      peep.setRect(rect);
+      return peep;
+    };
+
+    const createPeeps = () => {
+      const tintedSprites = getBrandColors().map((color) => createTintedSprite(image, color));
+      const rectWidth = image.naturalWidth / rows;
+      const rectHeight = image.naturalHeight / cols;
+      const total = rows * cols;
+
+      for (let index = 0; index < total; index += 1) {
+        allPeeps.push(
+          createPeep({
+            image: tintedSprites[index % tintedSprites.length],
+            rect: [
+              (index % rows) * rectWidth,
+              Math.floor(index / rows) * rectHeight,
+              rectWidth,
+              rectHeight,
+            ],
+          }),
+        );
+      }
+    };
+
+    const removePeepFromCrowd = (peep: Peep) => {
+      const index = crowd.indexOf(peep);
+      if (index >= 0) crowd.splice(index, 1);
+      availablePeeps.push(peep);
+    };
+
+    const addPeepToCrowd = () => {
+      const peep = removeRandomFromArray(availablePeeps);
+      if (!peep) return null;
+
+      const walk = normalWalk({ peep, props: resetPeep({ peep }) }).eventCallback("onComplete", () => {
+        removePeepFromCrowd(peep);
+        addPeepToCrowd();
+      });
+
+      peep.walk = walk;
+      crowd.push(peep);
+      crowd.sort((first, second) => first.anchorY - second.anchorY);
+
+      return peep;
+    };
+
+    const initCrowd = () => {
+      while (availablePeeps.length && crowd.length < maxCrowd) {
+        addPeepToCrowd()?.walk?.progress(Math.random());
+      }
+    };
 
     const resize = () => {
-      width = canvas.clientWidth;
-      height = canvas.clientHeight;
+      stage.width = canvas.clientWidth;
+      stage.height = canvas.clientHeight;
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-      canvas.width = width * pixelRatio;
-      canvas.height = height * pixelRatio;
+      canvas.width = stage.width * pixelRatio;
+      canvas.height = stage.height * pixelRatio;
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
-      walkers.forEach((walker, index) => {
-        const depth = 0.55 + ((index * 17) % 45) / 100;
-        walker.scale = depth;
-        walker.x = ((index / walkers.length) * width + (index % 3) * 38) % width;
-        walker.y = height - 8 - (index % 4) * 12;
-      });
+      crowd.forEach((peep) => peep.walk?.kill());
+      crowd.length = 0;
+      availablePeeps.length = 0;
+
+      const displayScale = Math.min(0.56, Math.max(0.42, stage.height / 520));
+      allPeeps.forEach((peep) => peep.setScale(displayScale));
+      availablePeeps.push(...allPeeps);
+      initCrowd();
     };
 
-    const drawWalker = (walker: Walker, time: number) => {
-      const walk = Math.sin(time * 9 + walker.phase);
-      const bob = reducedMotion ? 0 : Math.sin(time * 5 + walker.phase) * 1.4;
-      const lineWidth = Math.max(1.1, walker.scale * 1.8);
-
-      context.save();
-      context.globalAlpha = walker.opacity;
-      context.translate(walker.x, walker.y + bob);
-      context.scale(walker.direction * walker.scale, walker.scale);
-      context.strokeStyle = walker.color;
-      context.fillStyle = walker.color;
-      context.lineWidth = lineWidth;
-      context.lineCap = "round";
-
-      context.beginPath();
-      context.arc(0, -27, 4.5, 0, Math.PI * 2);
-      context.fill();
-
-      context.beginPath();
-      context.moveTo(0, -21);
-      context.lineTo(0, -4);
-      context.moveTo(0, -16);
-      context.lineTo(-7, -9 + walk * 1.5);
-      context.moveTo(0, -16);
-      context.lineTo(7, -9 - walk * 1.5);
-      context.moveTo(0, -4);
-      context.lineTo(-6, 7 + walk * 2.5);
-      context.moveTo(0, -4);
-      context.lineTo(6, 7 - walk * 2.5);
-      context.stroke();
-
-      context.restore();
+    const render = () => {
+      context.clearRect(0, 0, stage.width, stage.height);
+      crowd.forEach((peep) => peep.render(context));
     };
 
-    const render = (time: number) => {
-      const delta = lastTime ? Math.min(time - lastTime, 0.05) : 0;
-      lastTime = time;
-      context.clearRect(0, 0, width, height);
-
-      walkers.forEach((walker) => {
-        if (!reducedMotion) {
-          walker.x += walker.speed * delta * walker.direction;
-
-          if (walker.direction === 1 && walker.x > width + 20) walker.x = -20;
-          if (walker.direction === -1 && walker.x < -20) walker.x = width + 20;
-        }
-
-        drawWalker(walker, time);
-      });
+    const init = () => {
+      createPeeps();
+      resize();
+      gsap.ticker.add(render);
     };
 
-    resize();
-    gsap.ticker.add(render);
+    image.onload = init;
+    image.src = src;
     window.addEventListener("resize", resize);
 
     return () => {
       window.removeEventListener("resize", resize);
       gsap.ticker.remove(render);
+      crowd.forEach((peep) => peep.walk?.kill());
     };
-  }, [cols, rows]);
+  }, [cols, rows, src]);
 
-  return <canvas ref={canvasRef} aria-hidden="true" className={cn("absolute inset-0 h-full w-full", className)} />;
+  return <canvas ref={canvasRef} aria-hidden="true" className={cn("absolute bottom-0 left-0 h-full w-full", className)} />;
 };
 
 type Skiper39Props = HTMLAttributes<HTMLDivElement>;
@@ -148,7 +271,7 @@ type Skiper39Props = HTMLAttributes<HTMLDivElement>;
 const Skiper39 = ({ className, ...props }: Skiper39Props) => {
   return (
     <div {...props} className={cn("relative h-full w-full overflow-hidden bg-transparent", className)}>
-      <CrowdCanvas rows={8} cols={3} />
+      <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} className="h-[92%]" />
     </div>
   );
 };
@@ -158,5 +281,6 @@ export { CrowdCanvas, Skiper39 };
 /**
  * Skiper 39 Canvas_Crowd adapted for PuntuApp's footer.
  * Original component: https://skiper-ui.com/v1/skiper39
+ * Sprite sheet: https://skiper-ui.com/images/peeps/all-peeps.png
  * Free version attribution retained as required by Skiper UI.
  */

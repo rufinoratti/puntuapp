@@ -414,7 +414,7 @@ export function PuntuappHome() {
       <footer className="relative isolate overflow-hidden border-t border-canvas-line px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <Skiper39
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[260px] opacity-55"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[220px] opacity-35"
         />
         <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
           <div>
