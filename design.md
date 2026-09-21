@@ -1,6 +1,6 @@
 # PuntuApp · Dirección de diseño
 
-Este documento fija la dirección visual y de interacción de PuntuApp. La interfaz se construye como una biblioteca editorial para películas y videojuegos, con el aire relajado y la composición asimétrica de la referencia de Raus, pero con identidad propia para el mundo audiovisual.
+Este documento fija la dirección visual y de interacción de PuntuApp. La interfaz se construye como una biblioteca editorial para películas, videojuegos y libros, con el aire relajado y la composición asimétrica de la referencia de Raus, pero con identidad propia para el mundo audiovisual y editorial.
 
 ## Idea de producto
 
@@ -37,7 +37,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 1. **Header:** wordmark PUNTUAPP, navegación corta y acceso de cuenta.
 2. **Hero:** promesa de producto a la izquierda y explorador visual de tendencias a la derecha, con una división desktop cercana al 50/50.
 3. **Callout de criterio:** explica que la biblioteca se construye con la voz del usuario.
-4. **Catálogo:** búsqueda, filtros y fichas con portada, tipo, rating, año y creador.
+4. **Catálogo:** búsqueda, filtros y fichas con portada, tipo, rating, año y creador o autor.
 5. **Comunidad:** bloque coral para presentar la futura capa social.
 6. **Journal:** selecciones y notas editoriales que conectan películas y videojuegos.
 7. **Footer:** marca grande a la izquierda, navegación alineada a la derecha y la multitud animada ocupando la franja inferior sin competir con los enlaces.
@@ -58,6 +58,11 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 - El tono es argentino, cálido y directo: “guardá”, “puntuá”, “compartí”, “encontrá”.
 - Evitar claims de popularidad reales hasta conectar datos de TMDB, RAWG y Supabase.
 
+## Integraciones y costos
+
+- PuntuApp es un proyecto sin fines de lucro: las integraciones deben ser gratuitas y no depender de planes pagos, facturación obligatoria ni APIs con tarjeta como requisito.
+- Para libros se prioriza Open Library por sus APIs públicas de búsqueda, autores, ediciones y portadas. El uso debe mantenerse en un volumen bajo y las puntuaciones y reseñas deben seguir siendo propias de PuntuApp.
+
 ## Componentes de referencia
 
 - `src/components/ui/skiper-ui/skiper52.tsx`: galería expandible adaptada para títulos en tendencia.
@@ -67,7 +72,7 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 
 ## Próximas decisiones
 
-- Reemplazar `mediaItems` por resultados normalizados de TMDB y RAWG.
+- Reemplazar `mediaItems` por resultados normalizados de TMDB, RAWG y Open Library.
 - Definir el modelo de puntuación y reseñas en Supabase.
 - Agregar autenticación antes de habilitar crear perfil, guardar títulos y publicar reseñas.
 - Evaluar una vista de detalle para cada película o videojuego sin romper el lenguaje editorial de la home.
