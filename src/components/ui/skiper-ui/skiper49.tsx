@@ -43,7 +43,7 @@ export function Skiper49({
   if (images.length === 0) return null;
 
   return (
-    <div className={cn("flex h-full w-full items-center justify-center overflow-hidden rounded-[2rem] bg-transparent", className)}>
+    <div className={cn("flex h-full w-full items-center justify-center overflow-visible rounded-[2rem] bg-transparent", className)}>
       <Carousel_003
         images={images}
         showPagination={showPagination}
@@ -76,13 +76,14 @@ function Carousel_003({
   .Carousal_003 {
     width: 100%;
     height: clamp(340px, 35vw, 500px);
+    overflow: visible;
     padding-bottom: 50px !important;
   }
   
   .Carousal_003 .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: clamp(190px, 27vw, 300px);
+    width: clamp(170px, 20vw, 240px);
     height: 100%;
     overflow: hidden;
     border-radius: 1.45rem;
