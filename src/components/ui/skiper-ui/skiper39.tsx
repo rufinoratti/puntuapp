@@ -1,7 +1,7 @@
 "use client";
 
 /* The registry component is kept verbatim; its original implementation uses loose animation types. */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
 import { gsap } from "gsap";
 import React, { useEffect, useRef } from "react";
@@ -10,9 +10,10 @@ interface CrowdCanvasProps {
   src: string;
   rows?: number;
   cols?: number;
+  color?: string;
 }
 
-const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
+const CrowdCanvas = ({ src, rows = 15, cols = 7, color }: CrowdCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -26,6 +27,48 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       src,
       rows,
       cols,
+      color,
+    };
+
+    const tintSprite = (source: HTMLImageElement, tint: string) => {
+      const tintedSprite = document.createElement("canvas");
+      tintedSprite.width = source.naturalWidth;
+      tintedSprite.height = source.naturalHeight;
+
+      const tintedContext = tintedSprite.getContext("2d", {
+        willReadFrequently: true,
+      });
+      if (!tintedContext) return source;
+
+      tintedContext.drawImage(source, 0, 0);
+
+      const colorProbe = document.createElement("canvas");
+      colorProbe.width = 1;
+      colorProbe.height = 1;
+      const colorContext = colorProbe.getContext("2d");
+      if (!colorContext) return source;
+
+      colorContext.fillStyle = tint;
+      colorContext.fillRect(0, 0, 1, 1);
+      const [red, green, blue] = colorContext.getImageData(0, 0, 1, 1).data;
+      const imageData = tintedContext.getImageData(0, 0, tintedSprite.width, tintedSprite.height);
+
+      for (let index = 0; index < imageData.data.length; index += 4) {
+        const luminance =
+          imageData.data[index] * 0.2126 +
+          imageData.data[index + 1] * 0.7152 +
+          imageData.data[index + 2] * 0.0722;
+
+        // Tint the dark ink while preserving the sprite's white highlights and transparency.
+        if (luminance < 235) {
+          imageData.data[index] = red;
+          imageData.data[index + 1] = green;
+          imageData.data[index + 2] = blue;
+        }
+      }
+
+      tintedContext.putImageData(imageData, 0, 0);
+      return tintedSprite;
     };
 
     // UTILS
@@ -102,7 +145,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
 
     // TYPES
     type Peep = {
-      image: HTMLImageElement;
+      image: CanvasImageSource;
       rect: number[];
       width: number;
       height: number;
@@ -121,7 +164,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       image,
       rect,
     }: {
-      image: HTMLImageElement;
+      image: CanvasImageSource;
       rect: number[];
     }): Peep => {
       const peep: Peep = {
@@ -175,7 +218,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const availablePeeps: Peep[] = [];
     const crowd: Peep[] = [];
 
-    const createPeeps = () => {
+    const createPeeps = (sprite: CanvasImageSource) => {
       const { rows, cols } = config;
       const { naturalWidth: width, naturalHeight: height } = img;
       const total = rows * cols;
@@ -185,7 +228,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       for (let i = 0; i < total; i++) {
         allPeeps.push(
           createPeep({
-            image: img,
+            image: sprite,
             rect: [
               (i % rows) * rectWidth,
               ((i / rows) | 0) * rectHeight,
@@ -260,13 +303,12 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       initCrowd();
     };
 
-    const init = () => {
-      createPeeps();
+    img.onload = () => {
+      const sprite = config.color ? tintSprite(img, config.color) : img;
+      createPeeps(sprite);
       resize();
       gsap.ticker.add(render);
     };
-
-    img.onload = init;
     img.src = config.src;
 
     const handleResize = () => resize();
@@ -279,7 +321,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
         if (peep.walk) peep.walk.kill();
       });
     };
-  }, []);
+  }, [color, cols, rows, src]);
   return (
     <canvas ref={canvasRef} className="absolute bottom-0 h-[90vh] w-full" />
   );
