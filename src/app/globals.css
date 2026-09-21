@@ -155,6 +155,30 @@
   }
 }
 
+.hero-carousel-frame .Carousal_003 {
+  height: 420px;
+}
+
+.hero-carousel-frame .Carousal_003 .swiper-slide {
+  width: 260px;
+}
+
+@media (min-width: 40rem) {
+  .hero-carousel-frame .Carousal_003 {
+    height: 480px;
+  }
+
+  .hero-carousel-frame .Carousal_003 .swiper-slide {
+    width: 300px;
+  }
+}
+
+@media (min-width: 64rem) {
+  .hero-carousel-frame .Carousal_003 {
+    height: 550px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

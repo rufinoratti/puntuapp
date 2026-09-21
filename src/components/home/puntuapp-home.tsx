@@ -269,7 +269,7 @@ export function PuntuappHome() {
       </header>
 
       <section className="mx-auto w-full max-w-[1440px] px-4 pb-14 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-8">
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:gap-10 xl:gap-16">
+        <div className="grid items-start gap-12 lg:items-center lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:gap-10 xl:gap-16">
           <div className="relative z-10 w-full max-w-[680px] lg:pb-8">
             <p className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand">
               <span className="inline-block size-2 rounded-full bg-coral" />
@@ -307,12 +307,14 @@ export function PuntuappHome() {
             </div>
           </div>
 
-          <div className="relative min-h-[380px] lg:min-h-[500px]" aria-label="Películas y videojuegos en tendencia">
+          <div className="relative min-h-[470px] w-full sm:min-h-[530px] lg:min-h-[610px]" aria-label="Películas y videojuegos en tendencia">
             <div className="mb-3 flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
               <span>Ahora en PuntuApp</span>
               <span className="text-canvas-muted">Deslizá por las portadas</span>
             </div>
-            <Skiper49 />
+            <div className="hero-carousel-frame mt-2 flex min-h-[420px] items-center justify-center overflow-visible sm:min-h-[480px] lg:min-h-[550px]">
+              <Skiper49 />
+            </div>
           </div>
         </div>
       </section>
