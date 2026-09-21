@@ -1,4 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PuntuApp
+
+PuntuApp será una plataforma para descubrir, puntuar y reseñar películas y videojuegos.
+
+## Stack inicial
+
+- Next.js con App Router y TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase Auth + PostgreSQL
+- TMDB para películas
+- RAWG para videojuegos
+- Vercel para deploy
+
+## Configuración local
+
+1. Instalar dependencias:
+
+   ```bash
+   npm install
+   ```
+
+2. Copiar las variables de entorno:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. Completar las credenciales de Supabase, TMDB y RAWG en `.env.local`.
+
+4. Iniciar el servidor:
+
+   ```bash
+   npm run dev
+   ```
+
+Abrir [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+```bash
+npm run dev       # desarrollo
+npm run lint      # revisión de ESLint
+npm run build     # build de producción
+npm run start     # servidor de producción
+```
+
+Las claves de TMDB y RAWG deben consumirse desde el servidor de Next.js y nunca exponerse en componentes del navegador.
 
 ## Getting Started
 
