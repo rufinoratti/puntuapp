@@ -10,13 +10,14 @@ import {
   Film,
   Gamepad2,
   Search,
-  Sparkles,
   Star,
 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
+import { Skiper52, type Skiper52Item } from "@/components/ui/skiper-ui/skiper52";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,15 @@ const journalNotes = [
     title: "Pequeñas historias, grandes sensaciones.",
   },
 ];
+
+const trendingItems: Skiper52Item[] = mediaItems.slice(0, 6).map((item, index) => ({
+  src: item.image,
+  alt: item.imageAlt,
+  code: `0${index + 1}`,
+  title: item.title,
+  meta: `${item.type === "movie" ? "Película" : "Videojuego"} · ${item.genre}`,
+  rating: item.rating,
+}));
 
 function TypeIcon({ type }: { type: MediaType }) {
   const Icon = type === "movie" ? Film : Gamepad2;
@@ -159,10 +169,9 @@ export function PuntuappHome() {
     });
   }, [filter, query]);
 
-  const heroItems = [mediaItems[0], mediaItems[1], mediaItems[3]];
-
   return (
     <main className="min-h-[100dvh] overflow-hidden bg-canvas text-canvas-foreground selection:bg-coral selection:text-coral-foreground">
+      <PuntuappPreloader />
       <a
         href="#catalogo"
         className="sr-only z-50 rounded-full bg-brand px-4 py-3 font-medium text-brand-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -255,60 +264,12 @@ export function PuntuappHome() {
             </div>
           </div>
 
-          <div className="relative min-h-[550px] sm:min-h-[640px] lg:min-h-[700px]" aria-label="Selección visual de películas y videojuegos">
-            <div className="absolute left-0 top-10 w-[51%] sm:top-16">
-              <div className="relative aspect-[0.8] overflow-hidden rounded-[2.8rem] rounded-br-[0.85rem] bg-sky shadow-[0_24px_60px_oklch(0.25_0.04_155_/_0.1)]">
-                <Image
-                  src={heroItems[0].image}
-                  alt={heroItems[0].imageAlt}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 34vw, 50vw"
-                  className="object-cover transition duration-700 hover:scale-105"
-                />
-              </div>
-              <p className="mt-3 px-2 text-xs text-canvas-muted">
-                IDEA 01 <span className="mx-1.5 text-coral">·</span> Para cuando querés perderte en otro mundo.
-              </p>
+          <div className="relative min-h-[380px] lg:min-h-[520px]" aria-label="Películas y videojuegos en tendencia">
+            <div className="mb-3 flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+              <span>Ahora en PuntuApp</span>
+              <span className="text-canvas-muted">Pasá por las portadas</span>
             </div>
-
-            <div className="absolute right-0 top-0 w-[52%] sm:top-5">
-              <div className="relative aspect-[1.25] overflow-hidden rounded-[2.8rem] rounded-bl-[0.85rem] bg-coral shadow-[0_24px_60px_oklch(0.25_0.04_155_/_0.1)]">
-                <Image
-                  src={heroItems[1].image}
-                  alt={heroItems[1].imageAlt}
-                  fill
-                  sizes="(min-width: 1024px) 35vw, 52vw"
-                  className="object-cover transition duration-700 hover:scale-105"
-                />
-              </div>
-              <p className="mt-3 px-2 text-xs text-canvas-muted">
-                IDEA 02 <span className="mx-1.5 text-coral">·</span> Una partida más y después sí.
-              </p>
-            </div>
-
-            <div className="absolute bottom-0 right-[5%] w-[44%] sm:right-[8%]">
-              <div className="relative aspect-[0.82] overflow-hidden rounded-[2.8rem] rounded-tl-[0.85rem] bg-brand shadow-[0_24px_60px_oklch(0.25_0.04_155_/_0.1)]">
-                <Image
-                  src={heroItems[2].image}
-                  alt={heroItems[2].imageAlt}
-                  fill
-                  sizes="(min-width: 1024px) 30vw, 44vw"
-                  className="object-cover transition duration-700 hover:scale-105"
-                />
-              </div>
-              <p className="mt-3 px-2 text-xs text-canvas-muted">
-                IDEA 03 <span className="mx-1.5 text-coral">·</span> Mirar también es una forma de volver.
-              </p>
-            </div>
-
-            <div className="absolute left-[31%] top-[45%] rotate-[-5deg] rounded-[1.25rem] bg-coral px-4 py-3 text-coral-foreground shadow-xl sm:px-5 sm:py-4">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em]">
-                <Sparkles aria-hidden="true" className="size-4" />
-                4.8 / 5
-              </div>
-              <p className="mt-1 font-display text-xl leading-none">Tu próxima obsesión.</p>
-            </div>
+            <Skiper52 items={trendingItems} />
           </div>
         </div>
       </section>

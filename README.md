@@ -52,6 +52,8 @@ Las skills de frontend y arquitectura están disponibles localmente en `.agents/
 
 Para esta primera pantalla se aplicaron especialmente las guías de diseño frontend, accesibilidad, Next.js, React, Tailwind v4 y shadcn/ui.
 
+La dirección visual y las decisiones de interfaz están documentadas en [`design.md`](./design.md).
+
 ## Próximo paso sugerido
 
 Conectar el catálogo de muestra con TMDB y RAWG desde rutas de servidor, guardar los títulos normalizados en Supabase y después sumar autenticación para que cada usuario pueda crear sus puntuaciones y reseñas.
