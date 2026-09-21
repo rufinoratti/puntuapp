@@ -269,13 +269,13 @@ export function PuntuappHome() {
       </header>
 
       <section className="mx-auto w-full max-w-[1440px] px-4 pb-14 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-8">
-        <div className="grid items-start gap-12 lg:items-center lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:gap-10 xl:gap-16">
+        <div className="grid items-start gap-12 lg:items-center lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-8 xl:gap-12">
           <div className="relative z-10 w-full max-w-[680px] lg:pb-8">
             <p className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-brand">
               <span className="inline-block size-2 rounded-full bg-coral" />
               Películas + videojuegos + libros
             </p>
-            <h1 className="max-w-[12ch] font-display text-6xl leading-[0.86] tracking-[-0.07em] text-brand sm:text-7xl lg:text-[6.7rem] xl:text-[7.2rem]">
+            <h1 className="max-w-[12ch] font-display text-6xl leading-[0.86] tracking-[-0.07em] text-brand sm:text-7xl lg:text-[5.9rem] xl:text-[6.4rem]">
               Guardá lo que <span className="text-coral">te mueve.</span>
             </h1>
             <p className="mt-7 max-w-md text-base leading-7 text-canvas-muted sm:text-lg">

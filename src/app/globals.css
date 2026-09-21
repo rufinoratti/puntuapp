@@ -182,13 +182,17 @@
   }
 
   .hero-carousel-frame .Carousal_003 .swiper-slide {
-    width: 300px;
+    width: 330px;
   }
 }
 
 @media (min-width: 64rem) {
   .hero-carousel-frame .Carousal_003 {
     height: 550px;
+  }
+
+  .hero-carousel-frame .Carousal_003 .swiper-slide {
+    width: 360px;
   }
 }
 
