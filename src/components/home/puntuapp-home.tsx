@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
@@ -18,9 +19,16 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
-import { Skiper49 } from "@/components/ui/skiper-ui/skiper49";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
+
+const Skiper49 = dynamic(
+  () => import("@/components/ui/skiper-ui/skiper49").then((module) => module.Skiper49),
+  {
+    ssr: false,
+    loading: () => <div className="h-[350px] w-full max-w-4xl" aria-hidden="true" />,
+  },
+);
 
 type Filter = "all" | MediaType;
 

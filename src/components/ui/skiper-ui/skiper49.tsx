@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import React from "react";
@@ -18,57 +19,25 @@ import "swiper/css/effect-cards";
 
 import { cn } from "@/lib/utils";
 
-const Skiper49 = () => {
-  const images = [
-    {
-      src: "/images/x.com/13.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/32.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/20.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/21.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/19.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/1.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/2.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/3.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/4.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/5.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-    {
-      src: "/images/x.com/6.jpeg",
-      alt: "Illustrations by my fav AarzooAly",
-    },
-  ];
+export type CarouselSlide = {
+  src?: string;
+  alt: string;
+  label?: string;
+  tone?: string;
+};
+
+const placeholderSlides: CarouselSlide[] = [
+  { alt: "Películas próximamente", label: "Películas", tone: "bg-brand/10" },
+  { alt: "Videojuegos próximamente", label: "Videojuegos", tone: "bg-sky/35" },
+  { alt: "Libros próximamente", label: "Libros", tone: "bg-coral/25" },
+];
+
+const Skiper49 = ({ images = [] }: { images?: CarouselSlide[] }) => {
+  const slides = images.length > 0 ? images : placeholderSlides;
 
   return (
     <div className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f5f4f3]">
-      <Carousel_003 className="" images={images} showPagination loop />
+      <Carousel_003 className="" images={slides} showPagination loop={slides.length > 1} />
     </div>
   );
 };
@@ -84,7 +53,7 @@ const Carousel_003 = ({
   autoplay = false,
   spaceBetween = 0,
 }: {
-  images: { src: string; alt: string }[];
+  images: CarouselSlide[];
   className?: string;
   showPagination?: boolean;
   showNavigation?: boolean;
@@ -169,12 +138,24 @@ const Carousel_003 = ({
           modules={[EffectCoverflow, Autoplay, Pagination, Navigation]}
         >
           {images.map((image, index) => (
-            <SwiperSlide key={index} className="">
-              <img
-                className="h-full w-full object-cover"
-                src={image.src}
-                alt={image.alt}
-              />
+            <SwiperSlide key={`${image.alt}-${index}`} className="relative">
+              {image.src ? (
+                <Image
+                  fill
+                  className="object-cover"
+                  src={image.src}
+                  alt={image.alt}
+                  sizes="(max-width: 640px) 72vw, (max-width: 1024px) 34vw, 300px"
+                  quality={78}
+                  priority={index === 0}
+                />
+              ) : (
+                <div className={cn("flex h-full w-full items-end p-6", image.tone)}>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand/70">
+                    {image.label}
+                  </span>
+                </div>
+              )}
             </SwiperSlide>
           ))}
           {showNavigation && (

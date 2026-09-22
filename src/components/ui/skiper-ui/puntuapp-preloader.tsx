@@ -13,7 +13,7 @@ export function PuntuappPreloader() {
   );
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsVisible(false), reducedMotion ? 240 : 1500);
+    const timer = window.setTimeout(() => setIsVisible(false), reducedMotion ? 180 : 800);
 
     return () => window.clearTimeout(timer);
   }, [reducedMotion]);
