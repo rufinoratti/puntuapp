@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type MouseEvent } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -74,14 +74,35 @@ function RatingStars({ value, size = "size-4" }: { value: number; size?: string 
 }
 
 function InteractiveRating({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  function handleStarClick(event: MouseEvent<HTMLButtonElement>, index: number) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const clickedLeftHalf = event.clientX - bounds.left < bounds.width / 2;
+
+    onChange(index + (clickedLeftHalf ? 0.5 : 1));
+  }
+
   return (
     <div className="flex gap-1" aria-label="Elegí una puntuación de media estrella a cinco estrellas">
       {Array.from({ length: 5 }).map((_, index) => {
-        const halfValue = index + 0.5;
-        const fullValue = index + 1;
-
         return (
-          <span key={index} className="relative inline-flex size-8">
+          <button
+            key={index}
+            type="button"
+            aria-label={`Elegir entre ${index + 0.5} y ${index + 1} estrellas`}
+            aria-pressed={value > index && value <= index + 1}
+            onClick={(event) => handleStarClick(event, index)}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+                event.preventDefault();
+                onChange(Math.max(0.5, value - 0.5));
+              }
+              if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                event.preventDefault();
+                onChange(Math.min(5, value + 0.5));
+              }
+            }}
+            className="relative inline-flex size-8 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+          >
             <span className="relative inline-flex">
               <Star aria-hidden="true" className="size-8 text-brand-foreground/35" />
               <span
@@ -92,21 +113,7 @@ function InteractiveRating({ value, onChange }: { value: number; onChange: (valu
                 <Star aria-hidden="true" className="size-8 max-w-none fill-coral text-coral" />
               </span>
             </span>
-            <button
-              type="button"
-              aria-label={`${halfValue} estrellas`}
-              aria-pressed={value === halfValue}
-              onClick={() => onChange(halfValue)}
-              className="absolute inset-y-0 left-0 z-10 w-1/2 rounded-l-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
-            />
-            <button
-              type="button"
-              aria-label={`${fullValue} ${fullValue === 1 ? "estrella" : "estrellas"}`}
-              aria-pressed={value === fullValue}
-              onClick={() => onChange(fullValue)}
-              className="absolute inset-y-0 right-0 z-10 w-1/2 rounded-r-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
-            />
-          </span>
+          </button>
         );
       })}
     </div>
@@ -147,7 +154,7 @@ export function MediaDetail({ item }: { item: MediaItem }) {
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-5 sm:px-6 sm:pb-24 sm:pt-10 lg:px-8">
         <section className="grid gap-10 lg:grid-cols-[minmax(280px,0.7fr)_minmax(0,1.3fr)] lg:items-center lg:gap-16">
           <div className="relative mx-auto w-full max-w-[460px]">
-            <div className="absolute -right-3 top-8 h-full w-full rounded-[2.4rem] bg-coral/35 sm:-right-5 sm:top-10" />
+            <div className="pointer-events-none absolute -right-3 top-8 aspect-[4/5] w-full rounded-[2.4rem] bg-coral/35 sm:-right-5 sm:top-10" />
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2.4rem] border-8 border-canvas-subtle bg-sky shadow-[0_24px_70px_oklch(0.25_0.04_155_/_0.14)]">
               <Image
                 src={imageSrc}
