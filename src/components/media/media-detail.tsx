@@ -154,8 +154,8 @@ export function MediaDetail({ item }: { item: MediaItem }) {
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-5 sm:px-6 sm:pb-24 sm:pt-10 lg:px-8">
         <section className="grid gap-10 lg:grid-cols-[minmax(280px,0.7fr)_minmax(0,1.3fr)] lg:items-center lg:gap-16">
           <div className="relative mx-auto w-full max-w-[460px]">
-            <div className="pointer-events-none absolute -right-3 top-8 aspect-[4/5] w-full rounded-[2.4rem] bg-coral/35 sm:-right-5 sm:top-10" />
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[2.4rem] border-8 border-canvas-subtle bg-sky shadow-[0_24px_70px_oklch(0.25_0.04_155_/_0.14)]">
+            <div className="pointer-events-none absolute -right-3 top-8 z-0 aspect-[4/5] w-full rounded-[2.4rem] bg-coral/35 sm:-right-5 sm:top-10" />
+            <div className="relative z-10 aspect-[4/5] overflow-hidden rounded-[2.4rem] border-8 border-canvas-subtle bg-sky shadow-[0_24px_70px_oklch(0.25_0.04_155_/_0.14)]">
               <Image
                 src={imageSrc}
                 alt={item.imageAlt}
@@ -166,7 +166,7 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 onError={() => setImageSrc("/images/book-placeholder.svg")}
               />
             </div>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2 rounded-[1.6rem] bg-canvas p-2">
               <span className="inline-flex items-center gap-2 rounded-full bg-brand/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand">
                 <TypeIcon type={item.type} />
                 {typeLabels[item.type]}
