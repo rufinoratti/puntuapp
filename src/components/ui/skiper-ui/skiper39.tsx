@@ -36,7 +36,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
     const spriteRows = rows;
     const spriteCols = cols;
     const maxActivePeeps = isMobile
-      ? Math.min(rows * cols, 40)
+      ? Math.min(rows * cols, 64)
       : rows * cols;
 
     const config = {
@@ -184,7 +184,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
       anchorY: number;
       scaleX: number;
       walk: any;
-      setRect: (rect: number[]) => void;
+      setRect: (rect: number[], destWidth?: number, destHeight?: number) => void;
       render: (ctx: CanvasRenderingContext2D) => void;
     };
 
@@ -207,10 +207,10 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
         anchorY: 0,
         scaleX: 1,
         walk: null,
-        setRect: (rect: number[]) => {
+        setRect: (rect: number[], destWidth?: number, destHeight?: number) => {
           peep.rect = rect;
-          peep.width = rect[2];
-          peep.height = rect[3];
+          peep.width = destWidth ?? rect[2];
+          peep.height = destHeight ?? rect[3];
           peep.drawArgs = [peep.image, ...rect, 0, 0, peep.width, peep.height];
         },
         render: (ctx: CanvasRenderingContext2D) => {
@@ -248,28 +248,35 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
     const crowd: Peep[] = [];
 
     const createPeeps = (sprite: CanvasImageSource) => {
-      const width =
+      const spriteWidth =
         sprite instanceof HTMLCanvasElement ? sprite.width : img.naturalWidth;
-      const height =
+      const spriteHeight =
         sprite instanceof HTMLCanvasElement ? sprite.height : img.naturalHeight;
       const total = spriteRows * spriteCols;
-      const rectWidth = width / spriteRows;
-      const rectHeight = height / spriteCols;
+      const srcCellWidth = spriteWidth / spriteRows;
+      const srcCellHeight = spriteHeight / spriteCols;
+      // Draw at the original sprite cell size even when the bitmap was downscaled for mobile memory.
+      const destCellWidth = img.naturalWidth / spriteRows;
+      const destCellHeight = img.naturalHeight / spriteCols;
       const step = total / maxActivePeeps;
 
       for (let i = 0; i < maxActivePeeps; i++) {
         const cell = Math.min(total - 1, Math.floor(i * step));
-        allPeeps.push(
-          createPeep({
-            image: sprite,
-            rect: [
-              (cell % spriteRows) * rectWidth,
-              ((cell / spriteRows) | 0) * rectHeight,
-              rectWidth,
-              rectHeight,
-            ],
-          }),
+        const peep = createPeep({
+          image: sprite,
+          rect: [0, 0, srcCellWidth, srcCellHeight],
+        });
+        peep.setRect(
+          [
+            (cell % spriteRows) * srcCellWidth,
+            ((cell / spriteRows) | 0) * srcCellHeight,
+            srcCellWidth,
+            srcCellHeight,
+          ],
+          destCellWidth,
+          destCellHeight,
         );
+        allPeeps.push(peep);
       }
     };
 
