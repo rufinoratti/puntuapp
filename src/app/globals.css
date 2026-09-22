@@ -165,6 +165,7 @@
 
 .hero-carousel-frame > div {
   background-color: var(--canvas);
+  min-width: 0;
 }
 
 @media (max-width: 39.999rem) {
@@ -173,6 +174,10 @@
     left: 0;
     width: 100%;
     margin-inline: auto;
+  }
+
+  .hero-carousel-frame .Carousal_003 .swiper-slide {
+    width: min(325px, calc(100vw - 2rem));
   }
 }
 

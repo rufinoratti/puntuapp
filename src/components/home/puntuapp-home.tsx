@@ -307,12 +307,12 @@ export function PuntuappHome() {
             </div>
           </div>
 
-          <div className="relative min-h-[470px] w-full sm:min-h-[530px] lg:min-h-[610px]" aria-label="Películas y videojuegos en tendencia">
+          <div className="relative min-h-[470px] min-w-0 w-full sm:min-h-[530px] lg:min-h-[610px]" aria-label="Películas y videojuegos en tendencia">
             <div className="mb-3 flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
               <span>Ahora en PuntuApp</span>
               <span className="text-canvas-muted">Deslizá por las portadas</span>
             </div>
-            <div className="hero-carousel-frame -mx-4 mt-2 flex min-h-[420px] w-[calc(100%+2rem)] items-center justify-center overflow-visible sm:mx-0 sm:min-h-[480px] sm:w-auto lg:min-h-[550px]">
+            <div className="hero-carousel-frame -mx-4 mt-2 flex min-h-[420px] min-w-0 w-[calc(100%+2rem)] items-center justify-center overflow-visible sm:mx-0 sm:min-h-[480px] sm:w-auto lg:min-h-[550px]">
               <Skiper49 />
             </div>
           </div>
