@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import {
   ArrowLeft,
-  ArrowUpRight,
-  Bookmark,
   BookOpen,
   Check,
   Clapperboard,
@@ -18,6 +16,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ArrowIcon } from "@/components/ui/skiper-ui/skiper99";
 import type { MediaItem, MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -55,17 +54,62 @@ function TypeIcon({ type }: { type: MediaType }) {
   return <Icon aria-hidden="true" className="size-4" />;
 }
 
-function ScoreStars({ score, size = "size-4" }: { score: number; size?: string }) {
+function RatingStars({ value, size = "size-4" }: { value: number; size?: string }) {
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${score} de 5 estrellas`}>
+    <span className="inline-flex items-center gap-0.5" aria-label={`${value.toFixed(1)} de 5 estrellas`}>
       {Array.from({ length: 5 }).map((_, index) => (
-        <Star
-          key={index}
-          aria-hidden="true"
-          className={cn(size, index < score ? "fill-coral text-coral" : "text-canvas-line")}
-        />
+        <span key={index} className="relative inline-flex">
+          <Star aria-hidden="true" className={cn(size, "text-canvas-line")} />
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-0 left-0 overflow-hidden transition-[width] duration-300 ease-out"
+            style={{ width: `${Math.min(Math.max(value - index, 0), 1) * 100}%` }}
+          >
+            <Star aria-hidden="true" className={cn(size, "max-w-none fill-coral text-coral")} />
+          </span>
+        </span>
       ))}
     </span>
+  );
+}
+
+function InteractiveRating({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  return (
+    <div className="flex gap-1" aria-label="Elegí una puntuación de media estrella a cinco estrellas">
+      {Array.from({ length: 5 }).map((_, index) => {
+        const halfValue = index + 0.5;
+        const fullValue = index + 1;
+
+        return (
+          <span key={index} className="relative inline-flex size-8">
+            <span className="relative inline-flex">
+              <Star aria-hidden="true" className="size-8 text-brand-foreground/35" />
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 overflow-hidden transition-[width] duration-300 ease-out"
+                style={{ width: `${Math.min(Math.max(value - index, 0), 1) * 100}%` }}
+              >
+                <Star aria-hidden="true" className="size-8 max-w-none fill-coral text-coral" />
+              </span>
+            </span>
+            <button
+              type="button"
+              aria-label={`${halfValue} estrellas`}
+              aria-pressed={value === halfValue}
+              onClick={() => onChange(halfValue)}
+              className="absolute inset-y-0 left-0 z-10 w-1/2 rounded-l-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+            />
+            <button
+              type="button"
+              aria-label={`${fullValue} ${fullValue === 1 ? "estrella" : "estrellas"}`}
+              aria-pressed={value === fullValue}
+              onClick={() => onChange(fullValue)}
+              className="absolute inset-y-0 right-0 z-10 w-1/2 rounded-r-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+            />
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -114,29 +158,20 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 className="object-cover"
                 onError={() => setImageSrc("/images/book-placeholder.svg")}
               />
-              <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-3 sm:inset-x-6 sm:top-6">
-                <span className="inline-flex items-center gap-2 rounded-full bg-canvas/95 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand shadow-sm backdrop-blur-sm">
-                  <TypeIcon type={item.type} />
-                  {typeLabels[item.type]}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand">
+                <TypeIcon type={item.type} />
+                {typeLabels[item.type]}
+              </span>
+              <span className="rounded-full bg-coral/15 px-3 py-2 text-xs font-semibold text-coral-foreground">{item.year}</span>
+              <span className="rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">{item.genre}</span>
+              {item.rating > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">
+                  <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+                  {item.rating.toFixed(1)}
                 </span>
-                <button
-                  type="button"
-                  aria-label={isSaved ? "Quitar de mi biblioteca" : "Guardar en mi biblioteca"}
-                  aria-pressed={isSaved}
-                  onClick={() => setIsSaved((value) => !value)}
-                  className="inline-flex size-10 items-center justify-center rounded-full bg-canvas/95 text-brand shadow-sm backdrop-blur-sm transition hover:bg-brand hover:text-brand-foreground"
-                >
-                  {isSaved ? <Check aria-hidden="true" className="size-4" /> : <Bookmark aria-hidden="true" className="size-4" />}
-                </button>
-              </div>
-              <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-4 sm:inset-x-6 sm:bottom-6">
-                <span className="rounded-full bg-coral px-3 py-2 text-sm font-bold text-coral-foreground shadow-sm">
-                  {item.rating > 0 ? item.rating.toFixed(1) : "—"}
-                </span>
-                <span className="rounded-full bg-canvas/95 px-3 py-2 text-xs font-semibold text-canvas-muted shadow-sm backdrop-blur-sm">
-                  {item.year}
-                </span>
-              </div>
+              )}
             </div>
           </div>
 
@@ -223,23 +258,9 @@ export function MediaDetail({ item }: { item: MediaItem }) {
             <form className="mt-8" onSubmit={handleSubmit}>
               <fieldset>
                 <legend className="text-sm font-semibold">Tu puntuación</legend>
-                <div className="mt-3 flex gap-1">
-                  {Array.from({ length: 5 }).map((_, index) => {
-                    const value = index + 1;
-
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        aria-label={`Puntuar con ${value} ${value === 1 ? "estrella" : "estrellas"}`}
-                        aria-pressed={score === value}
-                        onClick={() => setScore(value)}
-                        className="rounded-full p-1.5 text-brand-foreground/45 transition hover:bg-brand-foreground/10 hover:text-coral aria-pressed:text-coral"
-                      >
-                        <Star aria-hidden="true" className={cn("size-7", value <= score && "fill-coral text-coral")} />
-                      </button>
-                    );
-                  })}
+                <div className="mt-3 flex items-center gap-4">
+                  <InteractiveRating value={score} onChange={setScore} />
+                  <span className="text-sm font-semibold text-brand-foreground/70">{score ? score.toFixed(1) : "—"}</span>
                 </div>
               </fieldset>
 
@@ -281,7 +302,7 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 <article key={reviewItem.author} className="py-6 first:pt-7">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm font-semibold text-canvas-foreground">{reviewItem.author}</p>
-                    <ScoreStars score={reviewItem.rating} />
+                    <RatingStars value={reviewItem.rating} />
                   </div>
                   <p className="mt-3 max-w-xl font-display text-2xl leading-[1.05] tracking-[-0.03em] text-canvas-foreground/85">
                     “{reviewItem.text}”
@@ -291,7 +312,7 @@ export function MediaDetail({ item }: { item: MediaItem }) {
             </div>
 
             <Link href="/#catalogo" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand transition hover:text-coral">
-              Seguir descubriendo <ArrowUpRight aria-hidden="true" className="size-4" />
+              Seguir descubriendo <ArrowIcon className="size-5" />
             </Link>
           </div>
         </section>

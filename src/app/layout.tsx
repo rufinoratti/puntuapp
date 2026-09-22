@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { PuntuappFooter } from "@/components/layout/puntuapp-footer";
+
 export const metadata: Metadata = {
   title: "PuntuApp | Películas y videojuegos",
   description:
@@ -10,7 +12,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-canvas">
+        {children}
+        <PuntuappFooter />
+      </body>
     </html>
   );
 }

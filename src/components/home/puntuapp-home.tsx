@@ -18,7 +18,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
-import { CrowdCanvas } from "@/components/ui/skiper-ui/skiper39";
 import { Skiper49 } from "@/components/ui/skiper-ui/skiper49";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -118,25 +117,23 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
             className="object-cover transition duration-700 group-hover:scale-105"
             onError={item.type === "book" ? () => setImageSrc("/images/book-placeholder.svg") : undefined}
           />
-          <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-canvas/95 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand shadow-sm backdrop-blur-sm">
-              <TypeIcon type={item.type} />
-              {mediaTypeLabel(item.type)}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-canvas/95 px-3 py-1.5 text-sm font-semibold text-canvas-foreground shadow-sm backdrop-blur-sm">
-              {item.rating > 0 ? (
-                <>
-                  <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
-                  {item.rating.toFixed(1)}
-                </>
-              ) : (
-                "Sin puntuar"
-              )}
-            </span>
-          </div>
         </div>
 
-        <CardHeader className="gap-2 px-3 pb-3 pt-4">
+        <div className="flex flex-wrap items-center gap-2 px-2 pt-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/8 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand">
+            <TypeIcon type={item.type} />
+            {mediaTypeLabel(item.type)}
+          </span>
+          <span className="rounded-full bg-coral/15 px-3 py-1.5 text-xs font-semibold text-coral-foreground">{item.year}</span>
+          {item.rating > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-1.5 text-xs font-semibold text-canvas-foreground">
+              <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+              {item.rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+
+        <CardHeader className="gap-2 px-3 pb-3 pt-3">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand/70">
@@ -570,51 +567,6 @@ export function PuntuappHome() {
         </div>
       </section>
 
-      <footer className="relative isolate min-h-[620px] overflow-hidden border-t border-canvas-line px-4 pb-0 pt-10 sm:px-6 sm:pt-14 lg:min-h-[660px] lg:px-8 lg:pt-16">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[500px] overflow-hidden opacity-20 sm:h-[400px] lg:h-[440px]"
-        >
-          <CrowdCanvas
-            src="/images/peeps/all-peeps.png"
-            rows={15}
-            cols={7}
-            color="oklch(0.4 0.13 155)"
-            className="lg:translate-y-12"
-          />
-        </div>
-        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-12 pb-[460px] sm:pb-[340px] lg:grid-cols-2 lg:gap-10 lg:pb-[360px] xl:gap-16">
-          <div>
-            <Link href="/" className="text-6xl font-black leading-none tracking-[-0.1em] text-brand sm:text-8xl">
-              PUNTU<span className="text-coral">APP</span>
-            </Link>
-            <p className="mt-5 max-w-xs text-sm leading-6 text-canvas-muted">Un lugar para recordar lo que te dejó algo.</p>
-          </div>
-          <div>
-            <div className="grid grid-cols-2 gap-8 text-sm sm:gap-12">
-              <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Explorar</p>
-                <div className="flex flex-col gap-2 text-canvas-muted">
-                  <Link className="transition hover:text-brand" href="#catalogo">Catálogo</Link>
-                  <Link className="transition hover:text-brand" href="#comunidad">Comunidad</Link>
-                  <Link className="transition hover:text-brand" href="#como-funciona">Cómo funciona</Link>
-                </div>
-              </div>
-              <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Tu cuenta</p>
-                <div className="flex flex-col gap-2 text-canvas-muted">
-                  <Link className="transition hover:text-brand" href="#catalogo">Crear perfil</Link>
-                  <Link className="transition hover:text-brand" href="#catalogo">Iniciar sesión</Link>
-                </div>
-              </div>
-            </div>
-            <div className="mt-10 flex flex-wrap items-end justify-between gap-6">
-              <p className="max-w-sm text-sm leading-6 text-canvas-muted">Hecho para quienes siempre tienen algo para recomendar.</p>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-brand">© PuntuApp 2026</p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
