@@ -102,66 +102,63 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
   const [imageSrc, setImageSrc] = useState(item.image);
 
   return (
-    <Card
-      className={cn(
-        "group overflow-hidden rounded-[2rem] border-canvas-line bg-canvas-subtle p-2 text-canvas-foreground shadow-[0_12px_40px_oklch(0.25_0.04_155_/_0.05)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_oklch(0.25_0.04_155_/_0.12)]",
-        featured && "md:col-span-2",
-      )}
-    >
-      <div
-        className={cn(
-          "relative overflow-hidden rounded-[1.55rem] bg-sky",
-          featured ? "aspect-[16/10]" : "aspect-[4/5]",
-        )}
-      >
-        <Image
-          src={imageSrc}
-          alt={item.imageAlt}
-          fill
-          sizes={featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 768px) 25vw, 100vw"}
-          className="object-cover transition duration-700 group-hover:scale-105"
-          onError={item.type === "book" ? () => setImageSrc("/images/book-placeholder.svg") : undefined}
-        />
-        <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-canvas/95 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand shadow-sm backdrop-blur-sm">
-            <TypeIcon type={item.type} />
-            {mediaTypeLabel(item.type)}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-canvas/95 px-3 py-1.5 text-sm font-semibold text-canvas-foreground shadow-sm">
-            {item.rating > 0 ? (
-              <>
-                <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
-                {item.rating.toFixed(1)}
-              </>
-            ) : (
-              "Sin puntuar"
-            )}
-          </span>
-        </div>
-      </div>
-
-      <CardHeader className="gap-2 px-3 pb-3 pt-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand/70">
-              {item.genre} <span aria-hidden="true">·</span> {item.year}
-            </p>
-            <h3 className="mt-1 font-display text-2xl leading-none tracking-[-0.04em] text-canvas-foreground">
-              {item.title}
-            </h3>
-            <p className="mt-2 text-sm text-canvas-muted">
-              {item.creatorLabel}: <span className="text-canvas-foreground/80">{item.creator}</span>
-            </p>
+    <Link href={`/contenido/${item.slug}`} className={cn("group block h-full", featured && "md:col-span-2")}>
+      <Card className="h-full overflow-hidden rounded-[2rem] border-canvas-line bg-canvas-subtle p-2 text-canvas-foreground shadow-[0_12px_40px_oklch(0.25_0.04_155_/_0.05)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_oklch(0.25_0.04_155_/_0.12)]">
+        <div
+          className={cn(
+            "relative overflow-hidden rounded-[1.55rem] bg-sky",
+            featured ? "aspect-[16/10]" : "aspect-[4/5]",
+          )}
+        >
+          <Image
+            src={imageSrc}
+            alt={item.imageAlt}
+            fill
+            sizes={featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 768px) 25vw, 100vw"}
+            className="object-cover transition duration-700 group-hover:scale-105"
+            onError={item.type === "book" ? () => setImageSrc("/images/book-placeholder.svg") : undefined}
+          />
+          <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-canvas/95 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-brand shadow-sm backdrop-blur-sm">
+              <TypeIcon type={item.type} />
+              {mediaTypeLabel(item.type)}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-canvas/95 px-3 py-1.5 text-sm font-semibold text-canvas-foreground shadow-sm backdrop-blur-sm">
+              {item.rating > 0 ? (
+                <>
+                  <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+                  {item.rating.toFixed(1)}
+                </>
+              ) : (
+                "Sin puntuar"
+              )}
+            </span>
           </div>
-          <span
-            aria-hidden="true"
-            className="mt-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-canvas-line text-brand transition group-hover:border-brand group-hover:bg-brand group-hover:text-brand-foreground"
-          >
-            <ArrowUpRight className="size-4" />
-          </span>
         </div>
-      </CardHeader>
-    </Card>
+
+        <CardHeader className="gap-2 px-3 pb-3 pt-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand/70">
+                {item.genre} <span aria-hidden="true">·</span> {item.year}
+              </p>
+              <h3 className="mt-1 font-display text-2xl leading-none tracking-[-0.04em] text-canvas-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-2 text-sm text-canvas-muted">
+                {item.creatorLabel}: <span className="text-canvas-foreground/80">{item.creator}</span>
+              </p>
+            </div>
+            <span
+              aria-hidden="true"
+              className="mt-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-canvas-line text-brand transition group-hover:border-brand group-hover:bg-brand group-hover:text-brand-foreground"
+            >
+              <ArrowUpRight className="size-4" />
+            </span>
+          </div>
+        </CardHeader>
+      </Card>
+    </Link>
   );
 }
 
