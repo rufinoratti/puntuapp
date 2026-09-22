@@ -32,6 +32,37 @@ const filterOptions: Array<{ value: Filter; label: string }> = [
   { value: "book", label: "Libros" },
 ];
 
+const categoryFilterOptions: Record<Exclude<Filter, "all">, Array<{ value: string; label: string }>> = {
+  movie: [
+    { value: "all", label: "Todas" },
+    { value: "ciencia-ficcion", label: "Ciencia ficción" },
+    { value: "drama", label: "Drama" },
+    { value: "terror", label: "Terror" },
+    { value: "top", label: "Mejor puntuadas" },
+  ],
+  game: [
+    { value: "all", label: "Todos" },
+    { value: "pc", label: "PC" },
+    { value: "playstation", label: "PlayStation" },
+    { value: "nintendo-switch", label: "Nintendo Switch" },
+    { value: "xbox", label: "Xbox" },
+    { value: "top", label: "Mejor puntuados" },
+  ],
+  book: [
+    { value: "all", label: "Todos" },
+    { value: "ficcion", label: "Ficción" },
+    { value: "no-ficcion", label: "No ficción" },
+    { value: "clasicos", label: "Clásicos" },
+    { value: "top", label: "Mejor puntuados" },
+  ],
+};
+
+const categoryLabels: Record<Exclude<Filter, "all">, string> = {
+  movie: "películas",
+  game: "videojuegos",
+  book: "libros",
+};
+
 const journalNotes = [
   {
     item: mediaItems[2],
@@ -58,6 +89,13 @@ function TypeIcon({ type }: { type: MediaType }) {
 
 function mediaTypeLabel(type: MediaType) {
   return type === "movie" ? "Película" : type === "game" ? "Videojuego" : "Libro";
+}
+
+function matchesCategoryFilter(item: MediaItem, selectedFilter: string) {
+  if (selectedFilter === "all") return true;
+  if (selectedFilter === "top") return item.rating >= 4.7 || item.tags?.includes("top") === true;
+
+  return item.tags?.includes(selectedFilter) === true || item.platforms?.includes(selectedFilter) === true;
 }
 
 function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boolean }) {
@@ -160,6 +198,7 @@ function JournalCard({
 export function PuntuappHome() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [bookItems, setBookItems] = useState<MediaItem[]>([]);
   const [bookSearchStatus, setBookSearchStatus] = useState<"idle" | "loading" | "error">("idle");
 
@@ -208,19 +247,27 @@ export function PuntuappHome() {
 
     const localItems = mediaItems.filter((item) => {
       const matchesType = filter === "all" || item.type === filter;
+      const matchesCategory = filter === "all" || matchesCategoryFilter(item, categoryFilter);
       const matchesQuery =
         normalizedQuery.length === 0 ||
         [item.title, item.creator, item.genre].some((value) =>
           value.toLocaleLowerCase().includes(normalizedQuery),
         );
 
-      return matchesType && matchesQuery;
+      return matchesType && matchesCategory && matchesQuery;
     });
 
-    if (filter === "book") return bookItems;
+    const remoteBookItems = bookItems.filter((item) => matchesCategoryFilter(item, categoryFilter));
+
+    if (filter === "book") return [...localItems, ...remoteBookItems];
     if (filter === "all") return [...localItems, ...bookItems];
     return localItems;
-  }, [bookItems, filter, query]);
+  }, [bookItems, categoryFilter, filter, query]);
+
+  function handleCategoryChange(nextFilter: Filter) {
+    setFilter(nextFilter);
+    setCategoryFilter("all");
+  }
 
   return (
     <main className="min-h-[100dvh] overflow-hidden bg-canvas text-canvas-foreground selection:bg-coral selection:text-coral-foreground">
@@ -419,7 +466,7 @@ export function PuntuappHome() {
                 size="sm"
                 variant="outline"
                 aria-pressed={isActive}
-                onClick={() => setFilter(option.value)}
+                onClick={() => handleCategoryChange(option.value)}
                 className={cn(
                   "rounded-full border-canvas-line px-4",
                   isActive
@@ -436,6 +483,36 @@ export function PuntuappHome() {
             {bookSearchStatus === "loading" ? "Buscando libros…" : `${filteredItems.length} resultados`}
           </span>
         </div>
+
+        {filter !== "all" && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-canvas-line pt-4" aria-label={`Filtros de ${categoryLabels[filter]}`}>
+            <span className="mr-1 text-xs font-semibold uppercase tracking-[0.14em] text-canvas-muted">
+              Filtrar {categoryLabels[filter]}
+            </span>
+            {categoryFilterOptions[filter].map((option) => {
+              const isActive = categoryFilter === option.value;
+
+              return (
+                <Button
+                  key={option.value}
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  aria-pressed={isActive}
+                  onClick={() => setCategoryFilter(option.value)}
+                  className={cn(
+                    "h-8 rounded-full px-3 text-xs",
+                    isActive
+                      ? "bg-coral text-coral-foreground hover:bg-coral/85"
+                      : "text-canvas-muted hover:bg-coral/10 hover:text-coral-foreground",
+                  )}
+                >
+                  {option.label}
+                </Button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4" aria-live="polite">
           {filteredItems.length > 0 ? (

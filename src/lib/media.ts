@@ -12,6 +12,8 @@ export type MediaItem = {
   genre: string;
   image: string;
   imageAlt: string;
+  tags?: string[];
+  platforms?: string[];
 };
 
 // Datos de muestra para la primera iteración visual. Luego se reemplazan por TMDB, RAWG y Open Library.
@@ -29,6 +31,7 @@ export const mediaItems: MediaItem[] = [
     image:
       "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=900&q=85",
     imageAlt: "Sala de cine con una pantalla iluminada",
+    tags: ["ciencia-ficcion", "top"],
   },
   {
     id: "hades-ii",
@@ -43,6 +46,8 @@ export const mediaItems: MediaItem[] = [
     image:
       "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=900&q=85",
     imageAlt: "Control de videojuegos sobre una mesa oscura",
+    tags: ["top", "roguelike"],
+    platforms: ["pc", "playstation", "xbox"],
   },
   {
     id: "the-substance",
@@ -57,6 +62,7 @@ export const mediaItems: MediaItem[] = [
     image:
       "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=85",
     imageAlt: "Proyector de cine iluminando una sala",
+    tags: ["drama", "terror"],
   },
   {
     id: "clair-obscur",
@@ -71,6 +77,8 @@ export const mediaItems: MediaItem[] = [
     image:
       "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=85",
     imageAlt: "Videojuego en una pantalla con luces de colores",
+    tags: ["rpg", "top"],
+    platforms: ["pc", "playstation", "xbox"],
   },
   {
     id: "perfect-days",
@@ -85,6 +93,7 @@ export const mediaItems: MediaItem[] = [
     image:
       "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=85",
     imageAlt: "Butacas rojas frente a una pantalla de cine",
+    tags: ["drama", "top"],
   },
   {
     id: "hollow-knight",
@@ -99,5 +108,49 @@ export const mediaItems: MediaItem[] = [
     image:
       "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=900&q=85",
     imageAlt: "Setup de videojuegos con monitor y teclado",
+    tags: ["metroidvania"],
+    platforms: ["pc", "nintendo-switch"],
+  },
+  {
+    id: "the-left-hand-of-darkness",
+    slug: "the-left-hand-of-darkness",
+    type: "book",
+    title: "La mano izquierda de la oscuridad",
+    creatorLabel: "Autora",
+    creator: "Ursula K. Le Guin",
+    year: "1969",
+    rating: 4.8,
+    genre: "Ciencia ficción",
+    image: "/images/book-placeholder.svg",
+    imageAlt: "Portada de La mano izquierda de la oscuridad",
+    tags: ["ficcion", "ciencia-ficcion", "clasicos", "top"],
+  },
+  {
+    id: "distancia-de-rescate",
+    slug: "distancia-de-rescate",
+    type: "book",
+    title: "Distancia de rescate",
+    creatorLabel: "Autora",
+    creator: "Samanta Schweblin",
+    year: "2014",
+    rating: 4.5,
+    genre: "Ficción contemporánea",
+    image: "/images/book-placeholder.svg",
+    imageAlt: "Portada de Distancia de rescate",
+    tags: ["ficcion", "contemporaneo"],
+  },
+  {
+    id: "el-infinito-en-un-junco",
+    slug: "el-infinito-en-un-junco",
+    type: "book",
+    title: "El infinito en un junco",
+    creatorLabel: "Autora",
+    creator: "Irene Vallejo",
+    year: "2019",
+    rating: 4.6,
+    genre: "Ensayo",
+    image: "/images/book-placeholder.svg",
+    imageAlt: "Portada de El infinito en un junco",
+    tags: ["no-ficcion", "contemporaneo"],
   },
 ];
