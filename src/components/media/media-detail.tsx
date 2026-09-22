@@ -16,7 +16,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowIcon } from "@/components/ui/skiper-ui/skiper99";
+import { ArrowIcon } from "@/components/ui/arrow-icon";
 import type { MediaItem, MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -172,7 +172,9 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 {typeLabels[item.type]}
               </span>
               <span className="rounded-full bg-coral/15 px-3 py-2 text-xs font-semibold text-coral-foreground">{item.year}</span>
-              <span className="rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">{item.genre}</span>
+              <span className="rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">
+                {item.creator.trim() || item.genre}
+              </span>
               {item.rating > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">
                   <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
@@ -198,7 +200,9 @@ export function MediaDetail({ item }: { item: MediaItem }) {
             <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-6 border-y border-canvas-line py-6 sm:grid-cols-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-canvas-muted">{item.creatorLabel}</p>
-                <p className="mt-2 text-sm font-semibold text-canvas-foreground">{item.creator}</p>
+                <p className="mt-2 text-sm font-semibold text-canvas-foreground">
+                  {item.creator.trim() || "—"}
+                </p>
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-canvas-muted">Año</p>
@@ -301,7 +305,9 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">La conversación</p>
                 <h2 className="mt-3 font-display text-4xl leading-none tracking-[-0.05em] text-canvas-foreground sm:text-5xl">Lo que dejó en otros.</h2>
               </div>
-              <span className="hidden rounded-full bg-coral px-3 py-1.5 text-sm font-bold text-coral-foreground sm:inline-flex">{item.rating.toFixed(1)} / 5</span>
+              {item.rating > 0 && (
+                <span className="hidden rounded-full bg-coral px-3 py-1.5 text-sm font-bold text-coral-foreground sm:inline-flex">{item.rating.toFixed(1)} / 5</span>
+              )}
             </div>
 
             <div className="divide-y divide-canvas-line">

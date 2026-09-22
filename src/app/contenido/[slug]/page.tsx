@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { MediaDetail } from "@/components/media/media-detail";
-import { mediaItems } from "@/lib/media";
+import { getItemBySlug } from "@/lib/catalog";
 
 type MediaDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -10,7 +10,7 @@ type MediaDetailPageProps = {
 
 export async function generateMetadata({ params }: MediaDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const item = mediaItems.find((mediaItem) => mediaItem.slug === slug);
+  const item = await getItemBySlug(slug);
 
   return {
     title: item ? `${item.title} | PuntuApp` : "Contenido | PuntuApp",
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: MediaDetailPageProps): Promis
 
 export default async function MediaDetailPage({ params }: MediaDetailPageProps) {
   const { slug } = await params;
-  const item = mediaItems.find((mediaItem) => mediaItem.slug === slug);
+  const item = await getItemBySlug(slug);
 
   if (!item) notFound();
 

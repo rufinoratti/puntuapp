@@ -70,24 +70,6 @@ const categoryLabels: Record<Exclude<Filter, "all">, string> = {
   book: "libros",
 };
 
-const journalNotes = [
-  {
-    item: mediaItems[2],
-    eyebrow: "Para volver a mirar",
-    title: "Cuando una película te deja pensando todo el día.",
-  },
-  {
-    item: mediaItems[1],
-    eyebrow: "En la consola",
-    title: "Juegos para perder la noción del tiempo.",
-  },
-  {
-    item: mediaItems[4],
-    eyebrow: "Miradas de la comunidad",
-    title: "Pequeñas historias, grandes sensaciones.",
-  },
-];
-
 function TypeIcon({ type }: { type: MediaType }) {
   const Icon = type === "movie" ? Film : type === "game" ? Gamepad2 : BookOpen;
 
@@ -123,7 +105,7 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
             fill
             sizes={featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 768px) 25vw, 100vw"}
             className="object-cover transition duration-700 group-hover:scale-105"
-            onError={item.type === "book" ? () => setImageSrc("/images/book-placeholder.svg") : undefined}
+            onError={() => setImageSrc("/images/book-placeholder.svg")}
           />
         </div>
 
@@ -150,9 +132,11 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
               <h3 className="mt-1 font-display text-2xl leading-none tracking-[-0.04em] text-canvas-foreground">
                 {item.title}
               </h3>
-              <p className="mt-2 text-sm text-canvas-muted">
-                {item.creatorLabel}: <span className="text-canvas-foreground/80">{item.creator}</span>
-              </p>
+              {item.creator.trim() && (
+                <p className="mt-2 text-sm text-canvas-muted">
+                  {item.creatorLabel}: <span className="text-canvas-foreground/80">{item.creator}</span>
+                </p>
+              )}
             </div>
             <span
               aria-hidden="true"
@@ -167,11 +151,13 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
   );
 }
 
-function JournalCard({
-  note,
-}: {
-  note: (typeof journalNotes)[number];
-}) {
+type JournalNote = {
+  item: MediaItem;
+  eyebrow: string;
+  title: string;
+};
+
+function JournalCard({ note }: { note: JournalNote }) {
   return (
     <article className="group relative overflow-hidden rounded-[2rem] bg-brand p-2">
       <div className="relative aspect-[4/4.5] overflow-hidden rounded-[1.55rem]">
@@ -201,42 +187,80 @@ export function PuntuappHome() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [bookItems, setBookItems] = useState<MediaItem[]>([]);
-  const [bookSearchStatus, setBookSearchStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [catalogItems, setCatalogItems] = useState<MediaItem[]>(mediaItems);
+  const [remoteItems, setRemoteItems] = useState<MediaItem[]>([]);
+  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/catalog", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("catalog failed");
+        return response.json() as Promise<{ items?: MediaItem[] }>;
+      })
+      .then((data) => {
+        if (data.items?.length) setCatalogItems(data.items);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setCatalogItems(mediaItems);
+      });
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const normalizedQuery = query.trim();
-    const shouldSearchBooks = normalizedQuery.length >= 3 && (filter === "all" || filter === "book");
+    const shouldSearch = normalizedQuery.length >= 3;
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(async () => {
-      if (!shouldSearchBooks) {
-        setBookItems([]);
-        setBookSearchStatus("idle");
+      if (!shouldSearch) {
+        setRemoteItems([]);
+        setSearchStatus("idle");
         return;
       }
 
-      setBookSearchStatus("loading");
+      setSearchStatus("loading");
+
+      const endpoints: string[] = [];
+      if (filter === "all" || filter === "movie") {
+        endpoints.push(`/api/movies?query=${encodeURIComponent(normalizedQuery)}&limit=8`);
+      }
+      if (filter === "all" || filter === "game") {
+        endpoints.push(`/api/games?query=${encodeURIComponent(normalizedQuery)}&limit=8`);
+      }
+      if (filter === "all" || filter === "book") {
+        endpoints.push(`/api/books?query=${encodeURIComponent(normalizedQuery)}&limit=8`);
+      }
 
       try {
-        const response = await fetch(`/api/books?query=${encodeURIComponent(normalizedQuery)}&limit=12`, {
-          signal: controller.signal,
+        const responses = await Promise.all(
+          endpoints.map((endpoint) => fetch(endpoint, { signal: controller.signal })),
+        );
+        const payloads = await Promise.all(
+          responses.map(async (response) => {
+            if (!response.ok) return { items: [] as MediaItem[] };
+            return (await response.json()) as { items?: MediaItem[] };
+          }),
+        );
+
+        const merged = payloads.flatMap((payload) => payload.items ?? []);
+        const seen = new Set<string>();
+        const unique = merged.filter((item) => {
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
         });
 
-        if (!response.ok) {
-          throw new Error("Open Library request failed");
-        }
-
-        const data = (await response.json()) as { items?: MediaItem[] };
-        setBookItems(data.items ?? []);
-        setBookSearchStatus("idle");
+        setRemoteItems(unique);
+        setSearchStatus("idle");
       } catch {
         if (controller.signal.aborted) return;
-
-        setBookItems([]);
-        setBookSearchStatus("error");
+        setRemoteItems([]);
+        setSearchStatus("error");
       }
-    }, shouldSearchBooks ? 350 : 0);
+    }, shouldSearch ? 350 : 0);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -246,25 +270,56 @@ export function PuntuappHome() {
 
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
+    const isSearching = normalizedQuery.length >= 3;
 
-    const localItems = mediaItems.filter((item) => {
+    const matchesQuery = (item: MediaItem) =>
+      normalizedQuery.length === 0 ||
+      [item.title, item.creator, item.genre].some((value) =>
+        value.toLocaleLowerCase().includes(normalizedQuery),
+      );
+
+    const localItems = catalogItems.filter((item) => {
       const matchesType = filter === "all" || item.type === filter;
       const matchesCategory = filter === "all" || matchesCategoryFilter(item, categoryFilter);
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        [item.title, item.creator, item.genre].some((value) =>
-          value.toLocaleLowerCase().includes(normalizedQuery),
-        );
-
-      return matchesType && matchesCategory && matchesQuery;
+      return matchesType && matchesCategory && matchesQuery(item);
     });
 
-    const remoteBookItems = bookItems.filter((item) => matchesCategoryFilter(item, categoryFilter));
+    if (!isSearching) return localItems;
 
-    if (filter === "book") return [...localItems, ...remoteBookItems];
-    if (filter === "all") return [...localItems, ...bookItems];
-    return localItems;
-  }, [bookItems, categoryFilter, filter, query]);
+    const remoteMatches = remoteItems.filter((item) => {
+      const matchesType = filter === "all" || item.type === filter;
+      const matchesCategory = filter === "all" || matchesCategoryFilter(item, categoryFilter);
+      return matchesType && matchesCategory;
+    });
+
+    const localIds = new Set(localItems.map((item) => item.id));
+    const uniqueRemote = remoteMatches.filter((item) => !localIds.has(item.id));
+
+    return [...localItems, ...uniqueRemote];
+  }, [catalogItems, categoryFilter, filter, query, remoteItems]);
+
+  const journalNotes = useMemo(() => {
+    const pick = (type: MediaType, fallbackIndex: number) =>
+      catalogItems.find((item) => item.type === type) ?? mediaItems[fallbackIndex];
+
+    return [
+      {
+        item: pick("movie", 2),
+        eyebrow: "Para volver a mirar",
+        title: "Cuando una película te deja pensando todo el día.",
+      },
+      {
+        item: pick("game", 1),
+        eyebrow: "En la consola",
+        title: "Juegos para perder la noción del tiempo.",
+      },
+      {
+        item: pick("book", 6),
+        eyebrow: "Miradas de la comunidad",
+        title: "Pequeñas historias, grandes sensaciones.",
+      },
+    ];
+  }, [catalogItems]);
 
   function handleCategoryChange(nextFilter: Filter) {
     setFilter(nextFilter);
@@ -435,9 +490,11 @@ export function PuntuappHome() {
           </div>
         </div>
 
-        {(filter === "book" || bookItems.length > 0) && (
+        {query.trim().length >= 3 && (
           <p className="mt-3 text-xs text-canvas-muted">
-            Datos bibliográficos de{" "}
+            Resultados de{" "}
+            <span className="font-semibold text-brand">TMDB</span>,{" "}
+            <span className="font-semibold text-brand">RAWG</span> y{" "}
             <a
               href="https://openlibrary.org/"
               target="_blank"
@@ -446,6 +503,7 @@ export function PuntuappHome() {
             >
               Open Library
             </a>
+            .
           </p>
         )}
 
@@ -482,7 +540,7 @@ export function PuntuappHome() {
             );
           })}
           <span className="ml-2 text-sm text-canvas-muted" aria-live="polite">
-            {bookSearchStatus === "loading" ? "Buscando libros…" : `${filteredItems.length} resultados`}
+            {searchStatus === "loading" ? "Buscando en los catálogos…" : `${filteredItems.length} resultados`}
           </span>
         </div>
 
@@ -530,8 +588,8 @@ export function PuntuappHome() {
                   : "No encontramos ese título"}
               </h3>
               <p className="mt-3 max-w-sm text-sm leading-6 text-canvas-muted">
-                {bookSearchStatus === "error"
-                  ? "Open Library no respondió. Probá de nuevo en unos segundos."
+                {searchStatus === "error"
+                  ? "Los catálogos no respondieron. Probá de nuevo en unos segundos."
                   : filter === "book" && query.trim().length < 3
                     ? "Escribí al menos tres letras para consultar el catálogo de libros."
                     : "Probá con otro nombre, género, autor o creador."}

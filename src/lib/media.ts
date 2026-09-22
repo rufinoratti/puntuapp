@@ -19,7 +19,8 @@ export type MediaItem = {
   platforms?: string[];
 };
 
-// Datos de muestra para la primera iteración visual. Luego se reemplazan por TMDB, RAWG y Open Library.
+// Sample catalog shown while remote APIs are loading or unavailable.
+// Runtime data comes from TMDB, RAWG and Open Library via /api/* routes.
 export const mediaItems: MediaItem[] = [
   {
     id: "dune-part-two",

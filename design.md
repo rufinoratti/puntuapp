@@ -66,14 +66,15 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 ## Componentes de referencia
 
 - `src/components/ui/skiper-ui/skiper49.tsx`: componente original de Skiper49, sin modificaciones internas.
-- `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local. La etiqueta técnica del demo no se muestra en la interfaz pública, la multitud puede teñirse con un color de marca sin perder transparencia ni detalles claros y admite un desplazamiento responsive para controlar el recorte del encuadre.
-- `src/app/api/books/route.ts`: consulta y normaliza resultados de Open Library, con caché de una hora, límite de 12 resultados y fallback para portadas faltantes.
+- `src/components/ui/skiper-ui/skiper39.tsx`: componente original de Skiper39; su `CrowdCanvas` se inserta directamente como fondo del footer con la spritesheet local. La etiqueta técnica del demo no se muestra en la interfaz pública, la multitud puede teñirse con un color de marca sin perder transparencia ni detalles claros y admite un desplazamiento responsive para controlar el recorte del encuadre. El runtime está optimizado para móvil: pausa fuera de viewport, DPR limitado, menos peeps en pantallas chicas y cleanup completo del ticker.
+- `src/app/api/catalog/route.ts`: catálogo inicial combinado (TMDB + RAWG + libros de muestra).
+- `src/app/api/movies/route.ts` / `src/app/api/games/route.ts` / `src/app/api/books/route.ts`: búsqueda normalizada por tipo.
+- `src/lib/tmdb.ts`, `src/lib/rawg.ts`, `src/lib/books.ts`: clientes server-side con caché de una hora y fallback.
 - `src/components/ui/skiper-ui/puntuapp-preloader.tsx`: preload propio inspirado en el concepto Double Stairs.
 - `src/components/home/puntuapp-home.tsx`: composición de la landing y catálogo.
 
 ## Próximas decisiones
 
-- Reemplazar `mediaItems` por resultados normalizados de TMDB, RAWG y Open Library.
 - Definir el modelo de puntuación y reseñas en Supabase.
 - Agregar autenticación antes de habilitar crear perfil, guardar títulos y publicar reseñas.
-- Evaluar una vista de detalle para cada película o videojuego sin romper el lenguaje editorial de la home.
+- Completar filtros por categoría con los géneros reales de TMDB y RAWG.

@@ -27,6 +27,11 @@ PuntuApp será una plataforma para descubrir, puntuar y reseñar películas y vi
 
 3. Completar las credenciales de Supabase, TMDB y RAWG en `.env.local`.
 
+   - TMDB: cuenta gratuita en themoviedb.org → Settings → API → Read Access Token.
+   - RAWG: clave gratuita en rawg.io/apidocs.
+
+   Sin estas claves la home usa el catálogo de muestra y las APIs responden `503`.
+
 4. Iniciar el servidor:
 
    ```bash
@@ -56,4 +61,4 @@ La dirección visual y las decisiones de interfaz están documentadas en [`desig
 
 ## Próximo paso sugerido
 
-Conectar el catálogo de muestra con TMDB y RAWG desde rutas de servidor, guardar los títulos normalizados en Supabase y después sumar autenticación para que cada usuario pueda crear sus puntuaciones y reseñas.
+Conectar Supabase Auth y el modelo de puntuaciones/reseñas para que cada usuario pueda crear sus puntuaciones y reseñas sobre los títulos del catálogo.
