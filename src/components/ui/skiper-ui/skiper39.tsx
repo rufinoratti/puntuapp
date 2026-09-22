@@ -1,6 +1,6 @@
 "use client";
 
-/* The registry component is kept verbatim; its original implementation uses loose animation types. */
+/* The registry component is performance-tuned; its original implementation uses loose animation types. */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
 import { gsap } from "gsap";
@@ -14,6 +14,10 @@ interface CrowdCanvasProps {
   className?: string;
 }
 
+const MAX_SPRITE_WIDTH_MOBILE = 1800;
+const RESIZE_DEBOUNCE_MS = 200;
+const MOBILE_FRAME_SKIP = 2;
+
 const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -24,24 +28,48 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const isMobileQuery = window.matchMedia("(max-width: 640px)");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const isMobile = isMobileQuery.matches;
+
+    // Keep the full sprite grid for slicing; only lower the active crowd size on mobile.
+    const spriteRows = rows;
+    const spriteCols = cols;
+    const maxActivePeeps = isMobile
+      ? Math.min(rows * cols, 40)
+      : rows * cols;
+
     const config = {
       src,
-      rows,
-      cols,
+      rows: spriteRows,
+      cols: spriteCols,
       color,
     };
 
-    const tintSprite = (source: HTMLImageElement, tint: string) => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    let disposed = false;
+    let tickerAdded = false;
+    let canvasVisible = false;
+    let frameCount = 0;
+    let lastStageWidth = 0;
+    let lastStageHeight = 0;
+    let resizeTimer: number | undefined;
+
+    const tintSprite = (source: HTMLImageElement, tint: string): CanvasImageSource => {
+      const scale = isMobile
+        ? Math.min(1, MAX_SPRITE_WIDTH_MOBILE / source.naturalWidth)
+        : 1;
       const tintedSprite = document.createElement("canvas");
-      tintedSprite.width = source.naturalWidth;
-      tintedSprite.height = source.naturalHeight;
+      tintedSprite.width = Math.max(1, Math.round(source.naturalWidth * scale));
+      tintedSprite.height = Math.max(1, Math.round(source.naturalHeight * scale));
 
       const tintedContext = tintedSprite.getContext("2d", {
         willReadFrequently: true,
       });
       if (!tintedContext) return source;
 
-      tintedContext.drawImage(source, 0, 0);
+      tintedContext.drawImage(source, 0, 0, tintedSprite.width, tintedSprite.height);
 
       const colorProbe = document.createElement("canvas");
       colorProbe.width = 1;
@@ -220,19 +248,23 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
     const crowd: Peep[] = [];
 
     const createPeeps = (sprite: CanvasImageSource) => {
-      const { rows, cols } = config;
-      const { naturalWidth: width, naturalHeight: height } = img;
-      const total = rows * cols;
-      const rectWidth = width / rows;
-      const rectHeight = height / cols;
+      const width =
+        sprite instanceof HTMLCanvasElement ? sprite.width : img.naturalWidth;
+      const height =
+        sprite instanceof HTMLCanvasElement ? sprite.height : img.naturalHeight;
+      const total = spriteRows * spriteCols;
+      const rectWidth = width / spriteRows;
+      const rectHeight = height / spriteCols;
+      const step = total / maxActivePeeps;
 
-      for (let i = 0; i < total; i++) {
+      for (let i = 0; i < maxActivePeeps; i++) {
+        const cell = Math.min(total - 1, Math.floor(i * step));
         allPeeps.push(
           createPeep({
             image: sprite,
             rect: [
-              (i % rows) * rectWidth,
-              ((i / rows) | 0) * rectHeight,
+              (cell % spriteRows) * rectWidth,
+              ((cell / spriteRows) | 0) * rectHeight,
               rectWidth,
               rectHeight,
             ],
@@ -256,8 +288,11 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
           stage,
         }),
       }).eventCallback("onComplete", () => {
+        if (disposed) return;
         removePeepFromCrowd(peep);
-        addPeepToCrowd();
+        if (availablePeeps.length) {
+          addPeepToCrowd();
+        }
       });
 
       peep.walk = walk;
@@ -274,10 +309,14 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
     };
 
     const render = () => {
-      if (!canvas) return;
+      if (!canvas || disposed) return;
+      if (isMobile) {
+        frameCount += 1;
+        if (frameCount % MOBILE_FRAME_SKIP !== 0) return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
-      ctx.scale(devicePixelRatio, devicePixelRatio);
+      ctx.scale(dpr, dpr);
 
       crowd.forEach((peep) => {
         peep.render(ctx);
@@ -286,15 +325,41 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
       ctx.restore();
     };
 
+    const stopTicker = () => {
+      if (!tickerAdded) return;
+      gsap.ticker.remove(render);
+      tickerAdded = false;
+    };
+
+    const startTicker = () => {
+      if (disposed || tickerAdded) return;
+      if (!canvasVisible || document.hidden) return;
+      if (!allPeeps.length) return;
+      if (reducedMotionQuery.matches) {
+        render();
+        return;
+      }
+      gsap.ticker.add(render);
+      tickerAdded = true;
+    };
+
     const resize = () => {
-      if (!canvas) return;
+      if (!canvas || disposed) return;
       stage.width = canvas.clientWidth;
       stage.height = canvas.clientHeight;
-      canvas.width = stage.width * devicePixelRatio;
-      canvas.height = stage.height * devicePixelRatio;
+
+      if (stage.width < 1 || stage.height < 1) return;
+
+      lastStageWidth = stage.width;
+      lastStageHeight = stage.height;
+
+      canvas.width = Math.round(stage.width * dpr);
+      canvas.height = Math.round(stage.height * dpr);
+
+      if (!allPeeps.length) return;
 
       crowd.forEach((peep) => {
-        peep.walk.kill();
+        if (peep.walk) peep.walk.kill();
       });
 
       crowd.length = 0;
@@ -302,29 +367,93 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7, color, className }: CrowdCanvas
       availablePeeps.push(...allPeeps);
 
       initCrowd();
+      if (!tickerAdded && canvasVisible && !document.hidden) {
+        render();
+      }
+    };
+
+    const handleResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        if (disposed || !canvas) return;
+        const nextWidth = canvas.clientWidth;
+        const nextHeight = canvas.clientHeight;
+        if (
+          Math.abs(nextWidth - lastStageWidth) < 2 &&
+          Math.abs(nextHeight - lastStageHeight) < 2
+        ) {
+          return;
+        }
+        resize();
+      }, RESIZE_DEBOUNCE_MS);
     };
 
     img.onload = () => {
+      if (disposed) return;
       const sprite = config.color ? tintSprite(img, config.color) : img;
       createPeeps(sprite);
       resize();
-      gsap.ticker.add(render);
+      startTicker();
     };
     img.src = config.src;
 
-    const handleResize = () => resize();
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopTicker();
+      } else {
+        startTicker();
+      }
+    };
+
+    const observer =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            (entries) => {
+              canvasVisible = entries[0]?.isIntersecting ?? false;
+              if (canvasVisible) {
+                startTicker();
+              } else {
+                stopTicker();
+              }
+            },
+            { rootMargin: "200px 0px" },
+          )
+        : null;
+
+    if (observer) {
+      observer.observe(canvas);
+    } else {
+      canvasVisible = true;
+      startTicker();
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("resize", handleResize);
 
     return () => {
+      disposed = true;
+      window.clearTimeout(resizeTimer);
+      observer?.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("resize", handleResize);
-      gsap.ticker.remove(render);
+      img.onload = null;
+      img.removeAttribute("src");
+      stopTicker();
       crowd.forEach((peep) => {
         if (peep.walk) peep.walk.kill();
       });
+      crowd.length = 0;
+      availablePeeps.length = 0;
+      allPeeps.length = 0;
     };
   }, [color, cols, rows, src]);
+
   return (
-    <canvas ref={canvasRef} className={`absolute bottom-0 h-[90vh] w-full ${className ?? ""}`} />
+    <canvas
+      ref={canvasRef}
+      className={`absolute bottom-0 h-full w-full ${className ?? ""}`}
+      aria-hidden="true"
+    />
   );
 };
 
