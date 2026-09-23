@@ -19,6 +19,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PuntuappPreloader } from "@/components/ui/skiper-ui/puntuapp-preloader";
+import { WatchlistNavLink } from "@/components/watchlist/watchlist-nav-link";
 import { mediaItems, type MediaItem, type MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -304,6 +305,7 @@ export function PuntuappHome() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <WatchlistNavLink />
             <Button
               variant="outline"
               className="hidden rounded-full border-brand/30 bg-transparent text-brand hover:border-brand hover:bg-brand/5 sm:inline-flex"

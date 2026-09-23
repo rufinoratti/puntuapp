@@ -77,3 +77,4 @@ Los componentes deben usar tokens semánticos (`bg-brand`, `text-canvas-muted`, 
 - Definir el modelo de puntuación y reseñas en Supabase.
 - Agregar autenticación antes de habilitar crear perfil, guardar títulos y publicar reseñas.
 - Evaluar una vista de detalle para cada película o videojuego sin romper el lenguaje editorial de la home.
+- Migrar la watchlist de `localStorage` a una tabla de Supabase por usuario cuando exista autenticación; la UI ya está preparada para el cambio.
