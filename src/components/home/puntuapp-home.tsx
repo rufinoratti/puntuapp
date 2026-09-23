@@ -351,9 +351,14 @@ export function PuntuappHome() {
             >
               Ingresar
             </Button>
-            <Button className="rounded-full bg-brand px-4 text-brand-foreground hover:bg-brand/85">
+            <Link
+              href="/registro"
+              className={buttonVariants({
+                className: "h-9 rounded-full bg-brand px-4 text-brand-foreground hover:bg-brand/85",
+              })}
+            >
               Crear cuenta
-            </Button>
+            </Link>
           </div>
         </div>
       </header>
