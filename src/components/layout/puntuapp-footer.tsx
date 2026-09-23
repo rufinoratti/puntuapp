@@ -37,6 +37,7 @@ export function PuntuappFooter() {
             <div>
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Tu cuenta</p>
               <div className="flex flex-col gap-2 text-canvas-muted">
+                <Link className="transition hover:text-brand" href="/watchlist">Mi watchlist</Link>
                 <Link className="transition hover:text-brand" href="/#catalogo">Crear perfil</Link>
                 <Link className="transition hover:text-brand" href="/#catalogo">Iniciar sesión</Link>
               </div>

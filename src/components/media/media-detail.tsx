@@ -9,7 +9,6 @@ import {
   Check,
   Clapperboard,
   Gamepad2,
-  Heart,
   Send,
   Star,
 } from "lucide-react";
@@ -17,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowIcon } from "@/components/ui/skiper-ui/skiper99";
+import { WatchlistButton } from "@/components/watchlist/watchlist-button";
+import { WatchlistNavLink } from "@/components/watchlist/watchlist-nav-link";
 import type { MediaItem, MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -124,7 +125,6 @@ export function MediaDetail({ item }: { item: MediaItem }) {
   const [imageSrc, setImageSrc] = useState(item.image);
   const [score, setScore] = useState(0);
   const [review, setReview] = useState("");
-  const [isSaved, setIsSaved] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const reviews = sampleReviews[item.type];
 
@@ -141,14 +141,17 @@ export function MediaDetail({ item }: { item: MediaItem }) {
         <Link href="/" aria-label="PuntuApp, inicio" className="text-3xl font-black leading-none tracking-[-0.09em] text-brand sm:text-4xl">
           PUNTU<span className="text-coral">APP</span>
         </Link>
-        <Link
-          href="/#catalogo"
-          className="inline-flex items-center gap-2 rounded-full border border-brand/20 px-4 py-2 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5"
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          <span className="hidden sm:inline">Volver al catálogo</span>
-          <span className="sm:hidden">Catálogo</span>
-        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <WatchlistNavLink />
+          <Link
+            href="/#catalogo"
+            className="inline-flex items-center gap-2 rounded-full border border-brand/20 px-4 py-2 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">Volver al catálogo</span>
+            <span className="sm:hidden">Catálogo</span>
+          </Link>
+        </div>
       </header>
 
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-5 sm:px-6 sm:pb-24 sm:pt-10 lg:px-8">
@@ -244,14 +247,7 @@ export function MediaDetail({ item }: { item: MediaItem }) {
               <a href="#puntuar" className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground transition hover:bg-brand/85">
                 Puntuar esta historia <Star aria-hidden="true" className="size-4 fill-current" />
               </a>
-              <button
-                type="button"
-                onClick={() => setIsSaved((value) => !value)}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-brand/20 px-5 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5"
-              >
-                <Heart aria-hidden="true" className={cn("size-4", isSaved && "fill-coral text-coral")} />
-                {isSaved ? "En tu biblioteca" : "Guardar"}
-              </button>
+              <WatchlistButton item={item} />
             </div>
           </div>
         </section>
