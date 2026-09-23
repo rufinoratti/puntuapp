@@ -166,27 +166,33 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 onError={() => setImageSrc("/images/book-placeholder.svg")}
               />
             </div>
-            <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2 rounded-[1.6rem] bg-canvas p-2">
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand">
-                <TypeIcon type={item.type} />
-                {typeLabels[item.type]}
-              </span>
-              <span className="rounded-full bg-coral/15 px-3 py-2 text-xs font-semibold text-coral-foreground">{item.year}</span>
-              <span className="rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">{item.genre}</span>
-              {item.rating > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">
-                  <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
-                  {item.rating.toFixed(1)}
-                </span>
-              )}
-            </div>
           </div>
 
           <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-              <span>{item.genre}</span>
-              <span aria-hidden="true" className="text-coral">·</span>
-              <span>{typeLabels[item.type]}</span>
+            <div className="flex flex-wrap items-start justify-between gap-5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+                <span className="inline-flex items-center gap-2">
+                  <TypeIcon type={item.type} />
+                  {typeLabels[item.type]}
+                </span>
+                <span aria-hidden="true" className="h-4 w-px bg-canvas-line" />
+                <span className="text-canvas-muted">{item.genre}</span>
+              </div>
+
+              {item.rating > 0 && (
+                <div
+                  className="flex shrink-0 items-center gap-3 border-l border-canvas-line pl-4"
+                  aria-label={`Puntuación promedio: ${item.rating.toFixed(1)} de 5`}
+                >
+                  <Star aria-hidden="true" className="size-5 fill-coral text-coral" />
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-canvas-muted">Puntuación</p>
+                    <p className="mt-0.5 text-xl font-bold leading-none text-canvas-foreground">
+                      {item.rating.toFixed(1)} <span className="text-xs font-medium text-canvas-muted">/ 5</span>
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             <h1 className="mt-5 max-w-4xl font-display text-6xl leading-[0.86] tracking-[-0.07em] text-brand sm:text-7xl lg:text-[7rem]">
               {item.title}
