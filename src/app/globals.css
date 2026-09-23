@@ -183,6 +183,10 @@
   min-width: 0;
 }
 
+body:has([data-auth-screen]) > footer {
+  display: none;
+}
+
 @media (max-width: 39.999rem) {
   .hero-carousel-frame .Carousal_003 {
     position: relative;
