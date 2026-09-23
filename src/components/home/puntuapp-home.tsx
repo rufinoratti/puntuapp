@@ -70,6 +70,9 @@ const categoryLabels: Record<Exclude<Filter, "all">, string> = {
   book: "libros",
 };
 
+const sectionLinkMotion =
+  "motion-safe:transition-transform motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-px";
+
 const journalNotes = [
   {
     item: mediaItems[2],
@@ -173,7 +176,7 @@ function JournalCard({
   note: (typeof journalNotes)[number];
 }) {
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] bg-brand p-2">
+    <article data-scroll-reveal className="group relative overflow-hidden rounded-[2rem] bg-brand p-2">
       <div className="relative aspect-[4/4.5] overflow-hidden rounded-[1.55rem]">
         <Image
           src={note.item.image}
@@ -266,13 +269,49 @@ export function PuntuappHome() {
     return localItems;
   }, [bookItems, categoryFilter, filter, query]);
 
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>("[data-puntuapp-home]");
+
+    if (
+      !root ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !("IntersectionObserver" in window)
+    ) {
+      return;
+    }
+
+    const targets = root.querySelectorAll<HTMLElement>("[data-scroll-reveal]");
+    if (targets.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        root.classList.add("scroll-reveal-ready");
+
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("is-in-view");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -32px 0px" },
+    );
+
+    targets.forEach((target) => observer.observe(target));
+
+    return () => observer.disconnect();
+  }, []);
+
   function handleCategoryChange(nextFilter: Filter) {
     setFilter(nextFilter);
     setCategoryFilter("all");
   }
 
   return (
-    <main className="min-h-[100dvh] overflow-hidden bg-canvas text-canvas-foreground selection:bg-coral selection:text-coral-foreground">
+    <main
+      data-puntuapp-home
+      className="min-h-[100dvh] overflow-hidden bg-canvas text-canvas-foreground selection:bg-coral selection:text-coral-foreground"
+    >
       <PuntuappPreloader />
       <a
         href="#catalogo"
@@ -334,7 +373,7 @@ export function PuntuappHome() {
               <Link
                 href="#catalogo"
                 className={buttonVariants({
-                  className: "h-11 rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85",
+                  className: cn("h-11 rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85", sectionLinkMotion),
                 })}
               >
                 Explorar catálogo
@@ -342,7 +381,10 @@ export function PuntuappHome() {
               </Link>
               <Link
                 href="#como-funciona"
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-brand/20 px-5 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5"
+                className={cn(
+                  "inline-flex h-11 items-center gap-2 rounded-full border border-brand/20 px-5 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5",
+                  sectionLinkMotion,
+                )}
               >
                 Cómo funciona <ArrowUpRight aria-hidden="true" className="size-4" />
               </Link>
@@ -369,7 +411,7 @@ export function PuntuappHome() {
       </section>
 
       <section id="como-funciona" className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div className="grid overflow-hidden rounded-[2.6rem] border border-canvas-line bg-canvas-subtle md:grid-cols-[1.1fr_0.9fr]">
+        <div data-scroll-reveal className="grid overflow-hidden rounded-[2.6rem] border border-canvas-line bg-canvas-subtle md:grid-cols-[1.1fr_0.9fr]">
           <div className="p-7 sm:p-10 lg:p-16">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Tu criterio, sin algoritmo</p>
             <h2 className="mt-5 max-w-xl font-display text-4xl leading-[0.94] tracking-[-0.055em] text-canvas-foreground sm:text-6xl">
@@ -381,7 +423,10 @@ export function PuntuappHome() {
             <Link
               href="#catalogo"
               className={buttonVariants({
-                className: "mt-8 h-11 rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85",
+                className: cn(
+                  "mt-8 h-11 rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85",
+                  sectionLinkMotion,
+                ),
               })}
             >
               Empezar a explorar <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
@@ -409,7 +454,7 @@ export function PuntuappHome() {
       </section>
 
       <section id="catalogo" className="mx-auto w-full max-w-[1440px] scroll-mt-8 px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div className="flex flex-col gap-8 border-b border-canvas-line pb-8 lg:flex-row lg:items-end lg:justify-between">
+        <div data-scroll-reveal className="flex flex-col gap-8 border-b border-canvas-line pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Descubrir</p>
             <h2 className="mt-4 font-display text-5xl leading-[0.9] tracking-[-0.06em] text-canvas-foreground sm:text-7xl">
@@ -449,7 +494,7 @@ export function PuntuappHome() {
           </p>
         )}
 
-        <div className="mt-6 flex flex-wrap items-center gap-2" aria-label="Filtrar catálogo">
+        <div data-scroll-reveal className="mt-6 flex flex-wrap items-center gap-2" aria-label="Filtrar catálogo">
           {filterOptions.map((option) => {
             const isActive = filter === option.value;
             const Icon =
@@ -516,7 +561,7 @@ export function PuntuappHome() {
           </div>
         )}
 
-        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4" aria-live="polite">
+        <div data-scroll-reveal className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4" aria-live="polite">
           {filteredItems.length > 0 ? (
             filteredItems.map((item, index) => (
               <MediaCard key={item.id} item={item} featured={index === 0 && filter === "all" && query.length === 0} />
@@ -542,7 +587,7 @@ export function PuntuappHome() {
       </section>
 
       <section id="comunidad" className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div className="rounded-[2.6rem] bg-coral p-7 text-coral-foreground sm:p-10 lg:p-16">
+        <div data-scroll-reveal className="rounded-[2.6rem] bg-coral p-7 text-coral-foreground sm:p-10 lg:p-16">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral-foreground/70">Notas de comunidad</p>
@@ -552,7 +597,10 @@ export function PuntuappHome() {
             </div>
             <Link
               href="#catalogo"
-              className="inline-flex h-11 w-fit items-center gap-2 rounded-full bg-coral-foreground px-5 text-sm font-semibold text-coral transition hover:bg-coral-foreground/85"
+              className={cn(
+                "inline-flex h-11 w-fit items-center gap-2 rounded-full bg-coral-foreground px-5 text-sm font-semibold text-coral transition hover:bg-coral-foreground/85",
+                sectionLinkMotion,
+              )}
             >
               Ver la selección <ArrowUpRight aria-hidden="true" className="size-4" />
             </Link>
@@ -561,7 +609,7 @@ export function PuntuappHome() {
       </section>
 
       <section className="mx-auto w-full max-w-[1440px] px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div data-scroll-reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Desde la comunidad</p>
             <h2 className="mt-4 font-display text-5xl leading-[0.9] tracking-[-0.06em] text-canvas-foreground sm:text-6xl">Para seguir mirando.</h2>
