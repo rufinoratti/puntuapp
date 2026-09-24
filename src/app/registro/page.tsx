@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   description: "Armá tu biblioteca personal de películas, videojuegos y libros.",
 };
 
-export default function RegistrationPage() {
-  return <RegistrationForm />;
+type RegistrationPageProps = {
+  searchParams: Promise<{ next?: string }>;
+};
+
+export default async function RegistrationPage({ searchParams }: RegistrationPageProps) {
+  const { next } = await searchParams;
+  return <RegistrationForm nextPath={next} />;
 }

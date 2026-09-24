@@ -4,9 +4,9 @@ import "./globals.css";
 import { PuntuappFooter } from "@/components/layout/puntuapp-footer";
 
 export const metadata: Metadata = {
-  title: "PuntuApp | Películas y videojuegos",
+  title: "PuntuApp | Películas, videojuegos y libros",
   description:
-    "Descubrí, puntuá y reseñá tus películas y videojuegos favoritos.",
+    "Descubrí, puntuá y reseñá tus películas, videojuegos y libros favoritos.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

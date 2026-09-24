@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { CrowdCanvas } from "@/components/ui/skiper-ui/skiper39";
 
@@ -38,8 +39,9 @@ export function PuntuappFooter() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">Tu cuenta</p>
               <div className="flex flex-col gap-2 text-canvas-muted">
                 <Link className="transition hover:text-brand" href="/watchlist">Mi watchlist</Link>
+                <Link className="transition hover:text-brand" href="/mi-cuenta">Mi cuenta</Link>
                 <Link className="transition hover:text-brand" href="/registro">Crear perfil</Link>
-                <Link className="transition hover:text-brand" href="/#catalogo">Iniciar sesión</Link>
+                <Link className="transition hover:text-brand" href="/iniciar-sesion">Iniciar sesión</Link>
               </div>
             </div>
           </div>
@@ -47,6 +49,22 @@ export function PuntuappFooter() {
             <p className="max-w-sm text-sm leading-6 text-canvas-muted">Hecho para quienes siempre tienen algo para recomendar.</p>
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-brand">© PuntuApp 2026</p>
           </div>
+          <section id="creditos" aria-labelledby="catalog-credits-title" className="mt-10 border-t border-canvas-line pt-6">
+            <h2 id="catalog-credits-title" className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Fuentes del catálogo</h2>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" aria-label="The Movie Database (TMDB)">
+                <Image src="/tmdb-logo.svg" alt="The Movie Database (TMDB)" width={72} height={52} />
+              </a>
+              <p className="max-w-lg text-xs leading-5 text-canvas-muted">
+                This product uses the TMDB API but is not endorsed or certified by TMDB.
+              </p>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-canvas-muted">
+              Videojuegos: <a className="font-semibold text-brand underline decoration-brand/30 underline-offset-2" href="https://rawg.io/" target="_blank" rel="noreferrer">RAWG</a>
+              {" · "}
+              Libros: <a className="font-semibold text-brand underline decoration-brand/30 underline-offset-2" href="https://openlibrary.org/" target="_blank" rel="noreferrer">Open Library</a>
+            </p>
+          </section>
         </div>
       </div>
     </footer>
