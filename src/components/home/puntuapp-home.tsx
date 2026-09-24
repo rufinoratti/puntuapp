@@ -382,9 +382,6 @@ export function PuntuappHome() {
             >
               Crear cuenta
             </Link>
-            >
-              Crear cuenta
-            </Link>
           </div>
         </div>
       </header>

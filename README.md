@@ -27,7 +27,7 @@ PuntuApp será una plataforma para descubrir, puntuar y reseñar películas, vid
 
 3. Completar las credenciales de Supabase, TMDB y RAWG en `.env.local`. `SUPABASE_SECRET_KEY` se usa solo en el servidor para crear fichas del catálogo; nunca debe llevar el prefijo `NEXT_PUBLIC_`.
 
-4. En Supabase, configurar **Authentication → URL Configuration** con el sitio local `http://localhost:3000` y permitir el callback `http://localhost:3000/auth/confirm`. Al desplegar, agregar también el dominio de producción y definir `NEXT_PUBLIC_SITE_URL`.
+4. En Supabase, configurar **Authentication → URL Configuration** con el sitio local `http://localhost:3000` y permitir el callback `http://localhost:3000/auth/confirm`. Para que el alta inicie sesión sin verificar el correo, desactivar **Confirm email** en **Authentication → Providers → Email**. Al desplegar, agregar también el dominio de producción y definir `NEXT_PUBLIC_SITE_URL`.
 
 5. Enlazar el CLI con tu proyecto y aplicar las migraciones:
 
@@ -37,7 +37,7 @@ PuntuApp será una plataforma para descubrir, puntuar y reseñar películas, vid
    supabase db push
    ```
 
-   La migración crea el catálogo normalizado, las reseñas y la biblioteca personal con políticas RLS.
+   Las migraciones crean los perfiles, el catálogo normalizado, las reseñas y la biblioteca personal con políticas RLS.
 
 6. Iniciar el servidor:
 
