@@ -1,14 +1,31 @@
 export type MediaType = "movie" | "game" | "book";
+export type MediaSource = "tmdb" | "rawg" | "openlibrary";
+
+export type MediaReview = {
+  id: string;
+  author: string;
+  rating: number;
+  text: string;
+  createdAt: string;
+};
 
 export type MediaItem = {
   id: string;
   slug: string;
   type: MediaType;
   title: string;
-  creatorLabel: string;
-  creator: string;
+  creatorLabel?: string;
+  creator?: string;
   year: string;
   rating: number;
+  externalRating?: {
+    value: number;
+    scale: 5 | 10;
+    label: string;
+  };
+  source?: MediaSource;
+  providerId?: string;
+  sourceUrl?: string;
   genre: string;
   image: string;
   imageAlt: string;
@@ -19,7 +36,7 @@ export type MediaItem = {
   platforms?: string[];
 };
 
-// Datos de muestra para la primera iteración visual. Luego se reemplazan por TMDB, RAWG y Open Library.
+// Historias de muestra para la portada y para mostrar el catálogo antes de iniciar una búsqueda externa.
 export const mediaItems: MediaItem[] = [
   {
     id: "dune-part-two",

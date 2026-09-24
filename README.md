@@ -1,6 +1,6 @@
 # PuntuApp
 
-PuntuApp será una plataforma para descubrir, puntuar y reseñar películas y videojuegos.
+PuntuApp será una plataforma para descubrir, puntuar y reseñar películas, videojuegos y libros.
 
 ## Stack inicial
 
@@ -25,9 +25,21 @@ PuntuApp será una plataforma para descubrir, puntuar y reseñar películas y vi
    cp .env.example .env.local
    ```
 
-3. Completar las credenciales de Supabase, TMDB y RAWG en `.env.local`.
+3. Completar las credenciales de Supabase, TMDB y RAWG en `.env.local`. `SUPABASE_SECRET_KEY` se usa solo en el servidor para crear fichas del catálogo; nunca debe llevar el prefijo `NEXT_PUBLIC_`.
 
-4. Iniciar el servidor:
+4. En Supabase, configurar **Authentication → URL Configuration** con el sitio local `http://localhost:3000` y permitir el callback `http://localhost:3000/auth/confirm`. Al desplegar, agregar también el dominio de producción y definir `NEXT_PUBLIC_SITE_URL`.
+
+5. Enlazar el CLI con tu proyecto y aplicar las migraciones:
+
+   ```bash
+   supabase login
+   supabase link --project-ref <project-ref>
+   supabase db push
+   ```
+
+   La migración crea el catálogo normalizado, las reseñas y la biblioteca personal con políticas RLS.
+
+6. Iniciar el servidor:
 
    ```bash
    npm run dev
@@ -46,6 +58,8 @@ npm run start     # servidor de producción
 
 Las claves de TMDB y RAWG deben consumirse desde el servidor de Next.js y nunca exponerse en componentes del navegador.
 
+La búsqueda externa está disponible en `/api/catalog/search`. Las reseñas requieren una sesión; cualquiera puede leer las reseñas publicadas y cada persona solo puede leer y cambiar su propia biblioteca y sus reseñas. Las políticas RLS de la base de datos aplican esos permisos.
+
 ## Skills del proyecto
 
 Las skills de frontend y arquitectura están disponibles localmente en `.agents/skills` y se registran en `skills-lock.json`.
@@ -54,6 +68,6 @@ Para esta primera pantalla se aplicaron especialmente las guías de diseño fron
 
 La dirección visual y las decisiones de interfaz están documentadas en [`design.md`](./design.md).
 
-## Próximo paso sugerido
+## Catálogos externos
 
-Conectar el catálogo de muestra con TMDB y RAWG desde rutas de servidor, guardar los títulos normalizados en Supabase y después sumar autenticación para que cada usuario pueda crear sus puntuaciones y reseñas.
+Las películas se consultan desde TMDB, los videojuegos desde RAWG y los libros desde Open Library. Las fichas demo siguen disponibles para mostrar el catálogo cuando todavía no hay una búsqueda activa. Para usar búsquedas de películas y videojuegos en producción hay que configurar las claves de TMDB y RAWG; respetá los términos de uso y atribución de cada proveedor.

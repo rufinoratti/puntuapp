@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useActionState, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -17,10 +17,12 @@ import {
   EyeOff,
 } from "lucide-react";
 
+import { signUpAction } from "@/app/auth/actions";
+
 type RegistrationField = "firstName" | "lastName" | "username" | "email" | "password";
 
 type RegistrationValues = Record<RegistrationField, string>;
-type FormStatus = { kind: "error" | "preview"; message: string };
+type FormStatus = { kind: "error"; message: string };
 
 const initialValues: RegistrationValues = {
   firstName: "",
@@ -110,6 +112,7 @@ function Field({
         </span>
         <input
           id={id}
+          name={id}
           type={id === "email" ? "email" : "text"}
           inputMode={inputMode}
           autoComplete={autoComplete}
@@ -176,9 +179,11 @@ function PasswordField({
         </span>
         <input
           id="password"
+          name="password"
           type={visible ? "text" : "password"}
           autoComplete="new-password"
           required
+          maxLength={72}
           value={value}
           placeholder="Al menos 8 caracteres"
           aria-invalid={Boolean(error)}
@@ -248,8 +253,9 @@ function StoryPanel() {
   );
 }
 
-export function RegistrationForm() {
+export function RegistrationForm({ nextPath = "/" }: { nextPath?: string }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [authState, formAction, isPending] = useActionState(signUpAction, {});
   const [values, setValues] = useState<RegistrationValues>(initialValues);
   const [touched, setTouched] = useState<Partial<Record<RegistrationField, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -260,6 +266,8 @@ export function RegistrationForm() {
   const visibleErrors = Object.fromEntries(
     fieldNames.map((field) => [field, submitted || touched[field] ? errors[field] : undefined]),
   ) as Partial<Record<RegistrationField, string>>;
+  const statusMessage = formStatus?.message ?? authState.error ?? authState.message;
+  const statusKind = formStatus?.kind ?? (authState.error ? "error" : authState.message ? "success" : undefined);
 
   function updateField(field: RegistrationField, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -271,11 +279,11 @@ export function RegistrationForm() {
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
     setSubmitted(true);
 
     const firstInvalidField = fieldNames.find((field) => errors[field]);
     if (firstInvalidField) {
+      event.preventDefault();
       setFormStatus({ kind: "error", message: "Revisá los campos marcados para continuar." });
       window.requestAnimationFrame(() => {
         formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
@@ -283,10 +291,7 @@ export function RegistrationForm() {
       return;
     }
 
-    setFormStatus({
-      kind: "preview",
-      message: "Todo está listo. La validación se hizo en este navegador; todavía no se envió ningún dato ni se creó una cuenta.",
-    });
+    setFormStatus(null);
   }
 
   return (
@@ -316,7 +321,8 @@ export function RegistrationForm() {
                 Un perfil para reunir tus películas, videojuegos y libros favoritos en un solo lugar.
               </p>
 
-              <form ref={formRef} method="post" noValidate onSubmit={handleSubmit} className="mt-6 space-y-3 sm:mt-7 sm:space-y-3.5 lg:mt-6 lg:space-y-2.5">
+              <form ref={formRef} action={formAction} noValidate onSubmit={handleSubmit} className="mt-6 space-y-3 sm:mt-7 sm:space-y-3.5 lg:mt-6 lg:space-y-2.5">
+                <input type="hidden" name="next" value={nextPath} />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field
                     id="firstName"
@@ -381,31 +387,39 @@ export function RegistrationForm() {
                 <div className="pt-0.5">
                   <button
                     type="submit"
+                    disabled={isPending}
                     className="group inline-flex h-[3.25rem] w-full items-center justify-center gap-2 rounded-[1.1rem] bg-brand px-5 text-sm font-semibold text-brand-foreground shadow-[0_8px_20px_oklch(0.4_0.13_155_/_0.12)] transition-[transform,background-color] duration-150 ease-out hover:bg-brand/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 active:scale-[0.98]"
                   >
-                    Crear mi cuenta
+                    {isPending ? "Creando tu cuenta…" : "Crear mi cuenta"}
                     <ArrowRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-0.5" />
                   </button>
                 </div>
 
                 <div
-                  role={formStatus ? (formStatus.kind === "error" ? "alert" : "status") : undefined}
-                  aria-live={formStatus?.kind === "error" ? "assertive" : "polite"}
+                  role={statusMessage ? (statusKind === "error" ? "alert" : "status") : undefined}
+                  aria-live={statusKind === "error" ? "assertive" : "polite"}
                   className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 text-xs leading-4 ${
-                    formStatus
-                      ? formStatus.kind === "error"
+                    statusMessage
+                      ? statusKind === "error"
                         ? "border-destructive/20 bg-destructive/5 text-destructive"
                         : "border-brand/20 bg-brand/5 text-brand"
                       : "border-canvas-line bg-canvas-subtle text-canvas-muted"
                   }`}
                 >
-                  <span className={`mt-1 size-2 shrink-0 rounded-full ${formStatus?.kind === "error" ? "bg-destructive" : "bg-brand"}`} />
+                  <span className={`mt-1 size-2 shrink-0 rounded-full ${statusKind === "error" ? "bg-destructive" : "bg-brand"}`} />
                   <p>
                     <strong className="font-semibold">Estado del sistema: </strong>
-                    {formStatus?.message ?? "Validación local activa. El alta todavía no está conectada y tus datos no se envían."}
+                    {statusMessage ?? "Completá tus datos para crear tu cuenta."}
                   </p>
                 </div>
               </form>
+
+              <p className="mt-5 text-center text-sm text-canvas-muted">
+                ¿Ya tenés cuenta?{" "}
+                <Link href="/iniciar-sesion" className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand">
+                  Iniciá sesión
+                </Link>
+              </p>
 
             </div>
           </div>

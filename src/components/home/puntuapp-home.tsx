@@ -32,6 +32,11 @@ const Skiper49 = dynamic(
 );
 
 type Filter = "all" | MediaType;
+type CatalogSearchResponse = {
+  items?: MediaItem[];
+  errors?: Partial<Record<MediaType, string>>;
+  error?: string;
+};
 
 const filterOptions: Array<{ value: Filter; label: string }> = [
   { value: "all", label: "Todo" },
@@ -104,7 +109,12 @@ function mediaTypeLabel(type: MediaType) {
 
 function matchesCategoryFilter(item: MediaItem, selectedFilter: string) {
   if (selectedFilter === "all") return true;
-  if (selectedFilter === "top") return item.rating >= 4.7 || item.tags?.includes("top") === true;
+  if (selectedFilter === "top") {
+    const externalRating = item.externalRating
+      ? (item.externalRating.value / item.externalRating.scale) * 5
+      : 0;
+    return Math.max(item.rating, externalRating) >= 4.7 || item.tags?.includes("top") === true;
+  }
 
   return item.tags?.includes(selectedFilter) === true || item.platforms?.includes(selectedFilter) === true;
 }
@@ -127,7 +137,7 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
             fill
             sizes={featured ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 768px) 25vw, 100vw"}
             className="object-cover transition duration-700 group-hover:scale-105"
-            onError={item.type === "book" ? () => setImageSrc("/images/book-placeholder.svg") : undefined}
+            onError={() => setImageSrc(item.type === "book" ? "/images/book-placeholder.svg" : "/puntuapp-hero.png")}
           />
         </div>
 
@@ -143,6 +153,12 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
               {item.rating.toFixed(1)}
             </span>
           )}
+          {item.externalRating && item.externalRating.value > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-1.5 text-xs font-semibold text-canvas-foreground">
+              <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+              {item.externalRating.value.toFixed(1)}/{item.externalRating.scale} {item.externalRating.label}
+            </span>
+          )}
         </div>
 
         <CardHeader className="gap-2 px-3 pb-3 pt-3">
@@ -154,9 +170,11 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
               <h3 className="mt-1 font-display text-2xl leading-none tracking-[-0.04em] text-canvas-foreground">
                 {item.title}
               </h3>
-              <p className="mt-2 text-sm text-canvas-muted">
-                {item.creatorLabel}: <span className="text-canvas-foreground/80">{item.creator}</span>
-              </p>
+              {item.creator && (
+                <p className="mt-2 text-sm text-canvas-muted">
+                  {item.creatorLabel ?? "Créditos"}: <span className="text-canvas-foreground/80">{item.creator}</span>
+                </p>
+              )}
             </div>
             <span
               aria-hidden="true"
@@ -205,42 +223,48 @@ export function PuntuappHome() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [bookItems, setBookItems] = useState<MediaItem[]>([]);
-  const [bookSearchStatus, setBookSearchStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [catalogItems, setCatalogItems] = useState<MediaItem[]>([]);
+  const [catalogSearchStatus, setCatalogSearchStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [catalogSearchError, setCatalogSearchError] = useState("");
+  const [catalogSearchWarnings, setCatalogSearchWarnings] = useState<string[]>([]);
 
   useEffect(() => {
     const normalizedQuery = query.trim();
-    const shouldSearchBooks = normalizedQuery.length >= 3 && (filter === "all" || filter === "book");
+    const shouldSearch = normalizedQuery.length >= 3;
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(async () => {
-      if (!shouldSearchBooks) {
-        setBookItems([]);
-        setBookSearchStatus("idle");
+      if (!shouldSearch) {
+        setCatalogItems([]);
+        setCatalogSearchStatus("idle");
+        setCatalogSearchError("");
+        setCatalogSearchWarnings([]);
         return;
       }
 
-      setBookSearchStatus("loading");
+      setCatalogItems([]);
+      setCatalogSearchStatus("loading");
+      setCatalogSearchError("");
+      setCatalogSearchWarnings([]);
 
       try {
-        const response = await fetch(`/api/books?query=${encodeURIComponent(normalizedQuery)}&limit=12`, {
-          signal: controller.signal,
-        });
+        const searchParams = new URLSearchParams({ query: normalizedQuery, type: filter, limit: "12" });
+        const response = await fetch(`/api/catalog/search?${searchParams}`, { signal: controller.signal });
+        const data = (await response.json()) as CatalogSearchResponse;
 
-        if (!response.ok) {
-          throw new Error("Open Library request failed");
-        }
+        if (!response.ok) throw new Error(data.error ?? "No se pudo consultar el catálogo.");
 
-        const data = (await response.json()) as { items?: MediaItem[] };
-        setBookItems(data.items ?? []);
-        setBookSearchStatus("idle");
-      } catch {
+        setCatalogItems(data.items ?? []);
+        setCatalogSearchWarnings(Object.values(data.errors ?? {}));
+        setCatalogSearchStatus("idle");
+      } catch (error) {
         if (controller.signal.aborted) return;
 
-        setBookItems([]);
-        setBookSearchStatus("error");
+        setCatalogItems([]);
+        setCatalogSearchError(error instanceof Error ? error.message : "No se pudo consultar el catálogo.");
+        setCatalogSearchStatus("error");
       }
-    }, shouldSearchBooks ? 350 : 0);
+    }, shouldSearch ? 350 : 0);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -251,24 +275,22 @@ export function PuntuappHome() {
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
 
-    const localItems = mediaItems.filter((item) => {
+    if (query.trim().length >= 3) {
+      return catalogItems.filter((item) => filter === "all" || matchesCategoryFilter(item, categoryFilter));
+    }
+
+    return mediaItems.filter((item) => {
       const matchesType = filter === "all" || item.type === filter;
       const matchesCategory = filter === "all" || matchesCategoryFilter(item, categoryFilter);
       const matchesQuery =
         normalizedQuery.length === 0 ||
-        [item.title, item.creator, item.genre].some((value) =>
+        [item.title, item.creator ?? "", item.genre].some((value) =>
           value.toLocaleLowerCase().includes(normalizedQuery),
         );
 
       return matchesType && matchesCategory && matchesQuery;
     });
-
-    const remoteBookItems = bookItems.filter((item) => matchesCategoryFilter(item, categoryFilter));
-
-    if (filter === "book") return [...localItems, ...remoteBookItems];
-    if (filter === "all") return [...localItems, ...bookItems];
-    return localItems;
-  }, [bookItems, categoryFilter, filter, query]);
+  }, [catalogItems, categoryFilter, filter, query]);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>("[data-puntuapp-home]");
@@ -345,17 +367,21 @@ export function PuntuappHome() {
 
           <div className="flex items-center gap-2">
             <WatchlistNavLink />
-            <Button
-              variant="outline"
-              className="hidden rounded-full border-brand/30 bg-transparent text-brand hover:border-brand hover:bg-brand/5 sm:inline-flex"
+            <Link
+              href="/iniciar-sesion"
+              className={buttonVariants({
+                variant: "outline",
+                className: "hidden rounded-full border-brand/30 bg-transparent text-brand hover:border-brand hover:bg-brand/5 sm:inline-flex",
+              })}
             >
               Ingresar
-            </Button>
+            </Link>
             <Link
               href="/registro"
-              className={buttonVariants({
-                className: "h-9 rounded-full bg-brand px-4 text-brand-foreground hover:bg-brand/85",
-              })}
+              className={buttonVariants({ className: "h-9 rounded-full bg-brand px-4 text-brand-foreground hover:bg-brand/85" })}
+            >
+              Crear cuenta
+            </Link>
             >
               Crear cuenta
             </Link>
@@ -480,6 +506,7 @@ export function PuntuappHome() {
             <Input
               id="catalog-search"
               value={query}
+              maxLength={100}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar título, género, autor o creador"
               className="h-12 rounded-full border-canvas-line bg-canvas-subtle pl-11 text-canvas-foreground placeholder:text-canvas-muted focus-visible:border-brand focus-visible:ring-brand/20"
@@ -487,17 +514,14 @@ export function PuntuappHome() {
           </div>
         </div>
 
-        {(filter === "book" || bookItems.length > 0) && (
+        {query.trim().length >= 3 && (
           <p className="mt-3 text-xs text-canvas-muted">
-            Datos bibliográficos de{" "}
-            <a
-              href="https://openlibrary.org/"
-              target="_blank"
-              rel="noreferrer"
-              className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand"
-            >
-              Open Library
-            </a>
+            Catálogos: {" "}
+            <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand">TMDB</a>
+            {" · "}
+            <a href="https://rawg.io/" target="_blank" rel="noreferrer" className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand">RAWG</a>
+            {" · "}
+            <a href="https://openlibrary.org/" target="_blank" rel="noreferrer" className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand">Open Library</a>
           </p>
         )}
 
@@ -534,9 +558,20 @@ export function PuntuappHome() {
             );
           })}
           <span className="ml-2 text-sm text-canvas-muted" aria-live="polite">
-            {bookSearchStatus === "loading" ? "Buscando libros…" : `${filteredItems.length} resultados`}
+            {catalogSearchStatus === "loading" ? "Buscando…" : `${filteredItems.length} resultados`}
           </span>
         </div>
+
+        {catalogSearchError && (
+          <p className="mt-4 text-sm text-coral-foreground" role="alert">
+            {catalogSearchError}
+          </p>
+        )}
+        {catalogSearchWarnings.length > 0 && (
+          <p className="mt-4 text-sm text-canvas-muted" role="status">
+            Algunos catálogos no respondieron: {catalogSearchWarnings.join(" ")}
+          </p>
+        )}
 
         {filter !== "all" && (
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-canvas-line pt-4" aria-label={`Filtros de ${categoryLabels[filter]}`}>
@@ -577,15 +612,19 @@ export function PuntuappHome() {
             <div className="col-span-full flex min-h-72 flex-col items-center justify-center rounded-[2rem] border border-dashed border-canvas-line bg-canvas-subtle px-6 text-center">
               <Search aria-hidden="true" className="mb-4 size-6 text-coral" />
               <h3 className="font-display text-3xl leading-none text-canvas-foreground">
-                {filter === "book" && query.trim().length < 3
-                  ? "Buscá un libro para empezar"
-                  : "No encontramos ese título"}
+                {catalogSearchStatus === "loading"
+                  ? "Buscando en los catálogos…"
+                  : query.trim().length < 3
+                    ? "Buscá una historia para empezar"
+                    : "No encontramos ese título"}
               </h3>
               <p className="mt-3 max-w-sm text-sm leading-6 text-canvas-muted">
-                {bookSearchStatus === "error"
-                  ? "Open Library no respondió. Probá de nuevo en unos segundos."
-                  : filter === "book" && query.trim().length < 3
-                    ? "Escribí al menos tres letras para consultar el catálogo de libros."
+                {catalogSearchError
+                  ? "Revisá la configuración del proveedor o probá de nuevo en unos segundos."
+                  : catalogSearchStatus === "loading"
+                    ? "Estamos consultando películas, videojuegos y libros."
+                  : query.trim().length < 3
+                    ? "Escribí al menos tres letras para consultar los catálogos externos."
                     : "Probá con otro nombre, género, autor o creador."}
               </p>
             </div>

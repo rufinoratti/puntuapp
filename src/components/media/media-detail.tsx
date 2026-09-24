@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type FormEvent, type MouseEvent } from "react";
+import { useActionState, useState, type MouseEvent } from "react";
 import {
   ArrowLeft,
   BookOpen,
-  Check,
   Clapperboard,
   Gamepad2,
+  Heart,
   Send,
   Star,
 } from "lucide-react";
@@ -16,9 +16,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowIcon } from "@/components/ui/skiper-ui/skiper99";
+import { submitReviewAction, toggleLibraryAction } from "@/app/actions/media";
 import { WatchlistButton } from "@/components/watchlist/watchlist-button";
 import { WatchlistNavLink } from "@/components/watchlist/watchlist-nav-link";
-import type { MediaItem, MediaType } from "@/lib/media";
+import type { MediaItem, MediaReview, MediaType } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 const typeLabels: Record<MediaType, string> = {
@@ -32,21 +33,6 @@ const platformLabels: Record<string, string> = {
   pc: "PC",
   playstation: "PlayStation",
   xbox: "Xbox",
-};
-
-const sampleReviews = {
-  movie: [
-    { author: "Mica", rating: 5, text: "Una experiencia enorme que se disfruta tanto por lo que cuenta como por cómo suena y se ve." },
-    { author: "Tomás", rating: 4, text: "Tiene una escala increíble, pero sus mejores momentos siguen siendo los más íntimos." },
-  ],
-  game: [
-    { author: "Sofi", rating: 5, text: "De esos juegos que te hacen decir ‘una partida más’ hasta que se hace de día." },
-    { author: "Nico", rating: 4, text: "Muchísima personalidad y un ritmo que recompensa volver a empezar." },
-  ],
-  book: [
-    { author: "Lara", rating: 5, text: "Una lectura que se queda dando vueltas mucho después de cerrar el libro." },
-    { author: "Julián", rating: 4, text: "Tiene ideas hermosas y una voz que invita a subrayar cada página." },
-  ],
 };
 
 function TypeIcon({ type }: { type: MediaType }) {
@@ -121,19 +107,23 @@ function InteractiveRating({ value, onChange }: { value: number; onChange: (valu
   );
 }
 
-export function MediaDetail({ item }: { item: MediaItem }) {
+type MediaDetailProps = {
+  item: MediaItem;
+  reviews: MediaReview[];
+  isInLibrary: boolean;
+  isAuthenticated: boolean;
+};
+
+export function MediaDetail({ item, reviews, isInLibrary, isAuthenticated }: MediaDetailProps) {
   const [imageSrc, setImageSrc] = useState(item.image);
   const [score, setScore] = useState(0);
   const [review, setReview] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const reviews = sampleReviews[item.type];
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!score || !review.trim()) return;
-
-    setIsSubmitted(true);
-  }
+  const [reviewState, reviewAction, isReviewPending] = useActionState(submitReviewAction, {});
+  const [libraryState, libraryAction, isLibraryPending] = useActionState(toggleLibraryAction, { isSaved: isInLibrary });
+  const isSaved = libraryState.isSaved ?? isInLibrary;
+  const communityRating = reviews.length
+    ? reviews.reduce((total, reviewItem) => total + reviewItem.rating, 0) / reviews.length
+    : 0;
 
   return (
     <main className="min-h-[100dvh] overflow-hidden bg-canvas text-canvas-foreground selection:bg-coral selection:text-coral-foreground">
@@ -166,8 +156,28 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 priority
                 sizes="(min-width: 1024px) 35vw, 100vw"
                 className="object-cover"
-                onError={() => setImageSrc("/images/book-placeholder.svg")}
+                onError={() => setImageSrc(item.type === "book" ? "/images/book-placeholder.svg" : "/puntuapp-hero.png")}
               />
+            </div>
+            <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2 rounded-[1.6rem] bg-canvas p-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand">
+                <TypeIcon type={item.type} />
+                {typeLabels[item.type]}
+              </span>
+              <span className="rounded-full bg-coral/15 px-3 py-2 text-xs font-semibold text-coral-foreground">{item.year}</span>
+              <span className="rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">{item.genre}</span>
+              {communityRating > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">
+                  <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+                  {communityRating.toFixed(1)} / 5 comunidad
+                </span>
+              )}
+              {item.externalRating && item.externalRating.value > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-canvas-line/70 px-3 py-2 text-xs font-semibold text-canvas-foreground">
+                  <Star aria-hidden="true" className="size-3.5 fill-coral text-coral" />
+                  {item.externalRating.value.toFixed(1)}/{item.externalRating.scale} {item.externalRating.label}
+                </span>
+              )}
             </div>
           </div>
 
@@ -205,10 +215,12 @@ export function MediaDetail({ item }: { item: MediaItem }) {
             </p>
 
             <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-6 border-y border-canvas-line py-6 sm:grid-cols-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-canvas-muted">{item.creatorLabel}</p>
-                <p className="mt-2 text-sm font-semibold text-canvas-foreground">{item.creator}</p>
-              </div>
+              {item.creator && (
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-canvas-muted">{item.creatorLabel ?? "Créditos"}</p>
+                  <p className="mt-2 text-sm font-semibold text-canvas-foreground">{item.creator}</p>
+                </div>
+              )}
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-canvas-muted">Año</p>
                 <p className="mt-2 text-sm font-semibold text-canvas-foreground">{item.year}</p>
@@ -222,6 +234,15 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 </div>
               )}
             </div>
+
+            {item.sourceUrl && (
+              <p className="mt-5 text-xs text-canvas-muted">
+                Datos del catálogo de {item.source === "tmdb" ? "TMDB" : item.source === "rawg" ? "RAWG" : "Open Library"}.{" "}
+                <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="font-semibold text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand">
+                  Ver ficha original
+                </a>
+              </p>
+            )}
 
             {item.cast && item.cast.length > 0 && (
               <div className="mt-6">
@@ -248,6 +269,32 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 Puntuar esta historia <Star aria-hidden="true" className="size-4 fill-current" />
               </a>
               <WatchlistButton item={item} />
+              {isAuthenticated ? (
+                <form action={libraryAction} className="flex flex-col items-start gap-2">
+                  <input type="hidden" name="slug" value={item.slug} />
+                  <button
+                    type="submit"
+                    disabled={isLibraryPending}
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-brand/20 px-5 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5 disabled:opacity-60"
+                  >
+                    <Heart aria-hidden="true" className={cn("size-4", isSaved && "fill-coral text-coral")} />
+                    {isLibraryPending ? "Guardando…" : isSaved ? "En tu biblioteca" : "Sumar a mi biblioteca"}
+                  </button>
+                  {(libraryState.message || libraryState.error) && (
+                    <span className="text-xs text-canvas-muted" role={libraryState.error ? "alert" : "status"}>
+                      {libraryState.error ?? libraryState.message}
+                    </span>
+                  )}
+                </form>
+              ) : (
+                <Link
+                  href={`/iniciar-sesion?next=${encodeURIComponent(`/contenido/${item.slug}`)}`}
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-brand/20 px-5 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5"
+                >
+                  <Heart aria-hidden="true" className="size-4" />
+                  Ingresá para guardar en tu biblioteca
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -264,37 +311,49 @@ export function MediaDetail({ item }: { item: MediaItem }) {
               </div>
             </div>
 
-            <form className="mt-8" onSubmit={handleSubmit}>
-              <fieldset>
-                <legend className="text-sm font-semibold">Tu puntuación</legend>
-                <div className="mt-3 flex items-center gap-4">
-                  <InteractiveRating value={score} onChange={setScore} />
-                  <span className="text-sm font-semibold text-brand-foreground/70">{score ? score.toFixed(1) : "—"}</span>
-                </div>
-              </fieldset>
+            {isAuthenticated ? (
+              <form className="mt-8" action={reviewAction}>
+                <input type="hidden" name="slug" value={item.slug} />
+                <input type="hidden" name="score" value={score} />
+                <fieldset disabled={isReviewPending}>
+                  <legend className="text-sm font-semibold">Tu puntuación</legend>
+                  <div className="mt-3 flex items-center gap-4">
+                    <InteractiveRating value={score} onChange={setScore} />
+                    <span className="text-sm font-semibold text-brand-foreground/70">{score ? score.toFixed(1) : "—"}</span>
+                  </div>
+                </fieldset>
 
-              <label htmlFor="review" className="mt-7 block text-sm font-semibold">Tu reseña</label>
-              <Textarea
-                id="review"
-                value={review}
-                onChange={(event) => setReview(event.target.value)}
-                placeholder="Escribí eso que te gustaría recomendarle a alguien…"
-                className="mt-3 min-h-32 resize-y rounded-2xl border-brand-foreground/20 bg-brand-foreground/10 px-4 py-3 text-brand-foreground placeholder:text-brand-foreground/55 focus-visible:border-coral focus-visible:ring-coral/30"
-              />
-              <Button
-                type="submit"
-                disabled={!score || !review.trim()}
-                className="mt-4 h-11 rounded-full bg-coral px-5 text-coral-foreground hover:bg-coral/85"
-              >
-                Publicar reseña <Send data-icon="inline-end" aria-hidden="true" />
-              </Button>
-              {isSubmitted && (
-                <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-brand-foreground/85" role="status">
-                  <Check aria-hidden="true" className="size-4" />
-                  Reseña guardada como mock. Después la conectamos con tu usuario.
-                </p>
-              )}
-            </form>
+                <label htmlFor="review" className="mt-7 block text-sm font-semibold">Tu reseña</label>
+                <Textarea
+                  id="review"
+                  name="review"
+                  value={review}
+                  maxLength={5000}
+                  onChange={(event) => setReview(event.target.value)}
+                  placeholder="Escribí eso que te gustaría recomendarle a alguien…"
+                  className="mt-3 min-h-32 resize-y rounded-2xl border-brand-foreground/20 bg-brand-foreground/10 px-4 py-3 text-brand-foreground placeholder:text-brand-foreground/55 focus-visible:border-coral focus-visible:ring-coral/30"
+                />
+                <Button
+                  type="submit"
+                  disabled={!score || !review.trim() || isReviewPending}
+                  className="mt-4 h-11 rounded-full bg-coral px-5 text-coral-foreground hover:bg-coral/85"
+                >
+                  {isReviewPending ? "Guardando…" : "Publicar reseña"} <Send data-icon="inline-end" aria-hidden="true" />
+                </Button>
+                {(reviewState.message || reviewState.error) && (
+                  <p className="mt-4 text-sm font-semibold text-brand-foreground/85" role={reviewState.error ? "alert" : "status"}>
+                    {reviewState.error ?? reviewState.message}
+                  </p>
+                )}
+              </form>
+            ) : (
+              <p className="mt-8 text-sm leading-6 text-brand-foreground/80">
+                <Link href={`/iniciar-sesion?next=${encodeURIComponent(`/contenido/${item.slug}`)}`} className="font-semibold text-coral underline decoration-coral/50 underline-offset-2">
+                  Iniciá sesión
+                </Link>{" "}
+                para puntuar y publicar tu reseña.
+              </p>
+            )}
           </div>
 
           <div>
@@ -303,21 +362,27 @@ export function MediaDetail({ item }: { item: MediaItem }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">La conversación</p>
                 <h2 className="mt-3 font-display text-4xl leading-none tracking-[-0.05em] text-canvas-foreground sm:text-5xl">Lo que dejó en otros.</h2>
               </div>
-              <span className="hidden rounded-full bg-coral px-3 py-1.5 text-sm font-bold text-coral-foreground sm:inline-flex">{item.rating.toFixed(1)} / 5</span>
+              {communityRating > 0 && (
+                <span className="hidden rounded-full bg-coral px-3 py-1.5 text-sm font-bold text-coral-foreground sm:inline-flex">{communityRating.toFixed(1)} / 5</span>
+              )}
             </div>
 
             <div className="divide-y divide-canvas-line">
-              {reviews.map((reviewItem) => (
-                <article key={reviewItem.author} className="py-6 first:pt-7">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold text-canvas-foreground">{reviewItem.author}</p>
-                    <RatingStars value={reviewItem.rating} />
-                  </div>
-                  <p className="mt-3 max-w-xl font-display text-2xl leading-[1.05] tracking-[-0.03em] text-canvas-foreground/85">
-                    “{reviewItem.text}”
-                  </p>
-                </article>
-              ))}
+              {reviews.length ? (
+                reviews.map((reviewItem) => (
+                  <article key={reviewItem.id} className="py-6 first:pt-7">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-sm font-semibold text-canvas-foreground">{reviewItem.author}</p>
+                      <RatingStars value={reviewItem.rating} />
+                    </div>
+                    <p className="mt-3 max-w-xl font-display text-2xl leading-[1.05] tracking-[-0.03em] text-canvas-foreground/85">
+                      “{reviewItem.text}”
+                    </p>
+                  </article>
+                ))
+              ) : (
+                <p className="py-7 text-sm leading-6 text-canvas-muted">Todavía no hay reseñas de la comunidad para esta historia.</p>
+              )}
             </div>
 
             <Link href="/#catalogo" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand transition hover:text-coral">
